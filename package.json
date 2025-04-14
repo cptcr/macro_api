@@ -1,6 +1,6 @@
 {
   "name": "macro_api",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A comprehensive API toolkit for various services including YouTube, Spotify, Valorant, DeepSeek, and ChatGPT.",
   "main": "dist/index.js",
   "scripts": {
@@ -33,5 +33,12 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node"
-  }
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "types": "dist/index.d.ts"
 }
