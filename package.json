@@ -1,6 +1,6 @@
 {
   "name": "macro_api",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A comprehensive API toolkit for various services including YouTube, Spotify, Valorant, DeepSeek, and ChatGPT.",
   "main": "dist/index.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "lint": "eslint . --ext .ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "cptcr",
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/axios": "^0.14.4",
