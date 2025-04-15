@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PACKAGE_INFO = exports.VERSION = exports.ChatGPT = exports.DeepSeek = exports.Valorant = exports.SpotifyAPI = exports.YouTubeNotify = void 0;
+exports.PACKAGE_INFO = exports.VERSION = exports.StripeAPI = exports.PayPalAPI = exports.NotionAPI = exports.FootballAPI = exports.ChatGPT = exports.DeepSeek = exports.Valorant = exports.SpotifyAPI = exports.YouTubeNotify = void 0;
 var YouTubeNotify_1 = require("./classes/YouTubeNotify");
 Object.defineProperty(exports, "YouTubeNotify", { enumerable: true, get: function () { return YouTubeNotify_1.YouTubeNotify; } });
 var SpotifyAPI_1 = require("./classes/SpotifyAPI");
@@ -11,6 +11,14 @@ var DeepSeek_1 = require("./classes/DeepSeek");
 Object.defineProperty(exports, "DeepSeek", { enumerable: true, get: function () { return DeepSeek_1.DeepSeek; } });
 var ChatGPT_1 = require("./classes/ChatGPT");
 Object.defineProperty(exports, "ChatGPT", { enumerable: true, get: function () { return ChatGPT_1.ChatGPT; } });
+var APIFootball_1 = require("./classes/APIFootball");
+Object.defineProperty(exports, "FootballAPI", { enumerable: true, get: function () { return APIFootball_1.FootballAPI; } });
+var Notion_1 = require("./classes/Notion");
+Object.defineProperty(exports, "NotionAPI", { enumerable: true, get: function () { return Notion_1.NotionAPI; } });
+var PayPal_1 = require("./classes/PayPal");
+Object.defineProperty(exports, "PayPalAPI", { enumerable: true, get: function () { return PayPal_1.PayPalAPI; } });
+var Stripe_1 = require("./classes/Stripe");
+Object.defineProperty(exports, "StripeAPI", { enumerable: true, get: function () { return Stripe_1.StripeAPI; } });
 exports.VERSION = '1.0.0';
 exports.PACKAGE_INFO = {
     name: 'macro_api',

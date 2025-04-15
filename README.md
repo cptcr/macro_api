@@ -1,38 +1,62 @@
 # macro_api
 
+<div class="text-lg text-gray-700 dark:text-gray-300 mb-6">
 A comprehensive API toolkit for various services including YouTube, Spotify, Valorant, DeepSeek, and ChatGPT.
+</div>
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/cptcr/macro_api/blob/main/LICENSE)
-[![npm version](https://img.shields.io/npm/v/macro_api.svg)](https://www.npmjs.com/package/macro_api)
-[![TypeScript](https://img.shields.io/badge/TypeScript-4.9.5-blue)](https://www.typescriptlang.org/)
+<div class="flex flex-wrap gap-2 mb-6">
+  <a href="https://github.com/cptcr/macro_api/blob/main/LICENSE" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+    <span>License: Apache 2.0</span>
+  </a>
+  <a href="https://www.npmjs.com/package/macro_api" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+    <span>npm version</span>
+  </a>
+  <a href="https://www.typescriptlang.org/" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+    <span>TypeScript 4.9.5</span>
+  </a>
+</div>
 
 ## Installation
 
-```bash
-npm install macro_api
-```
+<div class="mb-6">
+  <div class="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-4">
+    <div class="px-4 py-2 bg-gray-200 dark:bg-gray-700 font-mono text-sm">
+      npm install macro_api
+    </div>
+  </div>
 
-or
+  <div class="text-gray-700 dark:text-gray-300">or</div>
 
-```bash
-yarn add macro_api
-```
+  <div class="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mt-4">
+    <div class="px-4 py-2 bg-gray-200 dark:bg-gray-700 font-mono text-sm">
+      yarn add macro_api
+    </div>
+  </div>
+</div>
 
 ## Features
 
-- **YouTube Notification System**: Monitor YouTube channels and send notifications through Discord webhooks
-- **Spotify API Integration**: Complete wrapper for interacting with Spotify API endpoints
-- **Valorant Stats**: System to get Valorant player statistics and game data
-- **DeepSeek API**: Interface for interacting with DeepSeek AI models
-- **ChatGPT API**: Interface for interacting with OpenAI's ChatGPT models
+<ul class="space-y-2 mb-6 list-disc pl-5 text-gray-700 dark:text-gray-300">
+  <li><strong class="font-semibold">YouTube Notification System</strong>: Monitor YouTube channels and send notifications through Discord webhooks</li>
+  <li><strong class="font-semibold">Spotify API Integration</strong>: Complete wrapper for interacting with Spotify API endpoints</li>
+  <li><strong class="font-semibold">Valorant Stats</strong>: System to get Valorant player statistics and game data</li>
+  <li><strong class="font-semibold">DeepSeek API</strong>: Interface for interacting with DeepSeek AI models</li>
+  <li><strong class="font-semibold">ChatGPT API</strong>: Interface for interacting with OpenAI's ChatGPT models</li>
+</ul>
 
 ## Usage Examples
 
 ### YouTube Notification System
 
+<p class="text-gray-700 dark:text-gray-300 mb-4">
 Monitor a YouTube channel for new videos and send notifications to Discord:
+</p>
 
-```typescript
+<div class="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-6">
+  <div class="px-4 py-2 bg-gray-200 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 font-medium">
+    TypeScript
+  </div>
+  <pre class="p-4 overflow-x-auto text-sm font-mono">
 import { YouTubeNotify } from 'macro_api';
 
 // Create a new YouTube notification monitor
@@ -54,13 +78,20 @@ ytNotifier.startMonitoring();
 // To manually check for new videos
 const newVideos = await ytNotifier.manualCheck();
 console.log(`Found ${newVideos.length} new videos`);
-```
+  </pre>
+</div>
 
 ### Spotify API
 
+<p class="text-gray-700 dark:text-gray-300 mb-4">
 Interact with Spotify API to get tracks, create playlists, and more:
+</p>
 
-```typescript
+<div class="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-6">
+  <div class="px-4 py-2 bg-gray-200 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 font-medium">
+    TypeScript
+  </div>
+  <pre class="p-4 overflow-x-auto text-sm font-mono">
 import { SpotifyAPI } from 'macro_api';
 
 // Create a new Spotify API client
@@ -93,13 +124,20 @@ await spotify.addTracksToPlaylist(
   playlist.id,
   searchResults.tracks.items.map((track: any) => track.uri)
 );
-```
+  </pre>
+</div>
 
 ### Valorant Stats
 
+<p class="text-gray-700 dark:text-gray-300 mb-4">
 Get player statistics and information from Valorant:
+</p>
 
-```typescript
+<div class="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-6">
+  <div class="px-4 py-2 bg-gray-200 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 font-medium">
+    TypeScript
+  </div>
+  <pre class="p-4 overflow-x-auto text-sm font-mono">
 import { Valorant } from 'macro_api';
 
 // Create a new Valorant API client
@@ -122,13 +160,20 @@ const stats = await valorant.getPlayerStats('na', 'Username', 'Tag');
 console.log(`Win Rate: ${stats.overview.winRate}`);
 console.log(`K/D Ratio: ${stats.combat.kd}`);
 console.log(`Favorite Agent: ${stats.favorites.agents[0]?.agent}`);
-```
+  </pre>
+</div>
 
 ### DeepSeek API
 
+<p class="text-gray-700 dark:text-gray-300 mb-4">
 Interact with DeepSeek AI models:
+</p>
 
-```typescript
+<div class="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-6">
+  <div class="px-4 py-2 bg-gray-200 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 font-medium">
+    TypeScript
+  </div>
+  <pre class="p-4 overflow-x-auto text-sm font-mono">
 import { DeepSeek } from 'macro_api';
 
 // Create a new DeepSeek API client
@@ -157,13 +202,20 @@ const conversation = await deepseek.conversation([
   { role: 'user', content: 'And what is the population of Paris?' }
 ]);
 console.log(conversation);
-```
+  </pre>
+</div>
 
 ### ChatGPT API
 
+<p class="text-gray-700 dark:text-gray-300 mb-4">
 Interact with OpenAI's models:
+</p>
 
-```typescript
+<div class="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-6">
+  <div class="px-4 py-2 bg-gray-200 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 font-medium">
+    TypeScript
+  </div>
+  <pre class="p-4 overflow-x-auto text-sm font-mono">
 import { ChatGPT } from 'macro_api';
 
 // Create a new ChatGPT API client
@@ -203,17 +255,21 @@ console.log(functionCall);
 // Generate embeddings
 const embeddings = await chatgpt.embed('Hello world');
 console.log(`Embedding dimension: ${embeddings[0].embedding.length}`);
-```
+  </pre>
+</div>
 
 ## API Documentation
 
-### YouTubeNotify
-
-The YouTube notification system monitors YouTube channels for new videos and sends notifications via Discord webhooks.
-
-#### Constructor
-
-```typescript
+<div class="space-y-8 mb-6">
+  <div>
+    <h3 class="text-xl font-semibold mb-2 text-primary-600 dark:text-primary-400">YouTubeNotify</h3>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">
+      The YouTube notification system monitors YouTube channels for new videos and sends notifications via Discord webhooks.
+    </p>
+    
+    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Constructor</h4>
+    <div class="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-4">
+      <pre class="p-4 overflow-x-auto text-sm font-mono">
 new YouTubeNotify(options: {
   channelId: string;       // YouTube channel ID to monitor
   apiKey: string;          // YouTube Data API key
@@ -222,121 +278,147 @@ new YouTubeNotify(options: {
   includeDescription?: boolean; // Include video description in notifications (default: false)
   mentionEveryone?: boolean; // Mention @everyone in notifications (default: false)
 })
-```
+      </pre>
+    </div>
+    
+    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Methods</h4>
+    <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300">
+      <li><code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">setWebhook(url: string)</code>: Set the Discord webhook URL for notifications</li>
+      <li><code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">startMonitoring()</code>: Start monitoring the channel for new videos</li>
+      <li><code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">stopMonitoring()</code>: Stop monitoring the channel</li>
+      <li><code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">manualCheck()</code>: Manually check for new videos and return any found</li>
+    </ul>
+  </div>
 
-#### Methods
-
-- `setWebhook(url: string)`: Set the Discord webhook URL for notifications
-- `startMonitoring()`: Start monitoring the channel for new videos
-- `stopMonitoring()`: Stop monitoring the channel
-- `manualCheck()`: Manually check for new videos and return any found
-
-### SpotifyAPI
-
-Complete wrapper for the Spotify API to interact with all endpoints.
-
-#### Constructor
-
-```typescript
+  <div>
+    <h3 class="text-xl font-semibold mb-2 text-primary-600 dark:text-primary-400">SpotifyAPI</h3>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">
+      Complete wrapper for the Spotify API to interact with all endpoints.
+    </p>
+    
+    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Constructor</h4>
+    <div class="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-4">
+      <pre class="p-4 overflow-x-auto text-sm font-mono">
 new SpotifyAPI(options: {
   clientId: string;      // Spotify API client ID
   clientSecret: string;  // Spotify API client secret
   redirectUri?: string;  // OAuth redirect URI (required for authorization)
 })
-```
+      </pre>
+    </div>
+    
+    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Authentication Methods</h4>
+    <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 mb-4">
+      <li><code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getAuthorizationUrl(scopes: string[], state?: string)</code>: Get the authorization URL for OAuth login</li>
+      <li><code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">exchangeCode(code: string)</code>: Exchange authorization code for access token</li>
+      <li><code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">setAccessToken(token: string, expiresIn: number, refreshToken?: string)</code>: Set access token manually</li>
+      <li><code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">refreshAccessToken()</code>: Refresh the access token using the refresh token</li>
+    </ul>
+    
+    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">API Methods</h4>
+    <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300">
+      <li><strong>User:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getCurrentUser()</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getUser(userId: string)</code></li>
+      <li><strong>Tracks:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getTrack(trackId: string)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getTracks(trackIds: string[])</code></li>
+      <li><strong>Albums:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getAlbum(albumId: string)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getAlbumTracks(albumId: string, params?)</code></li>
+      <li><strong>Artists:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getArtist(artistId: string)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getArtistAlbums(artistId: string, params?)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getArtistTopTracks(artistId: string, market?)</code></li>
+      <li><strong>Playlists:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getPlaylist(playlistId: string)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getPlaylistTracks(playlistId: string, params?)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">createPlaylist(userId: string, name: string, isPublic?, description?)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">addTracksToPlaylist(playlistId: string, trackUris: string[], position?)</code></li>
+      <li><strong>Player:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getCurrentlyPlaying()</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getPlaybackState()</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">controlPlayback(action: 'play' | 'pause' | 'next' | 'previous', deviceId?)</code></li>
+      <li><strong>Search:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">search(query: string, types: Array<'album' | 'artist' | 'playlist' | 'track'>, params?)</code></li>
+      <li><strong>Recommendations:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getRecommendations(params)</code></li>
+    </ul>
+  </div>
 
-#### Authentication Methods
-
-- `getAuthorizationUrl(scopes: string[], state?: string)`: Get the authorization URL for OAuth login
-- `exchangeCode(code: string)`: Exchange authorization code for access token
-- `setAccessToken(token: string, expiresIn: number, refreshToken?: string)`: Set access token manually
-- `refreshAccessToken()`: Refresh the access token using the refresh token
-
-#### API Methods
-
-- User: `getCurrentUser()`, `getUser(userId: string)`
-- Tracks: `getTrack(trackId: string)`, `getTracks(trackIds: string[])`
-- Albums: `getAlbum(albumId: string)`, `getAlbumTracks(albumId: string, params?)`
-- Artists: `getArtist(artistId: string)`, `getArtistAlbums(artistId: string, params?)`, `getArtistTopTracks(artistId: string, market?)`
-- Playlists: `getPlaylist(playlistId: string)`, `getPlaylistTracks(playlistId: string, params?)`, `createPlaylist(userId: string, name: string, isPublic?, description?)`, `addTracksToPlaylist(playlistId: string, trackUris: string[], position?)`
-- Player: `getCurrentlyPlaying()`, `getPlaybackState()`, `controlPlayback(action: 'play' | 'pause' | 'next' | 'previous', deviceId?)`
-- Search: `search(query: string, types: Array<'album' | 'artist' | 'playlist' | 'track'>, params?)`
-- Recommendations: `getRecommendations(params)`
-
-### Valorant
-
-API client for retrieving Valorant player statistics and game data.
-
-#### Constructor
-
-```typescript
+  <div>
+    <h3 class="text-xl font-semibold mb-2 text-primary-600 dark:text-primary-400">Valorant</h3>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">
+      API client for retrieving Valorant player statistics and game data.
+    </p>
+    
+    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Constructor</h4>
+    <div class="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-4">
+      <pre class="p-4 overflow-x-auto text-sm font-mono">
 new Valorant(apiKey?: string) // Optional API key for Henrik's Valorant API
-```
+      </pre>
+    </div>
+    
+    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Methods</h4>
+    <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300">
+      <li><strong>Account:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getAccount(name: string, tag: string)</code></li>
+      <li><strong>MMR:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getMMR(name: string, tag: string, options?: { region?: string })</code></li>
+      <li><strong>Match History:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getMatchHistory(region: string, name: string, tag: string, options?)</code></li>
+      <li><strong>Stats:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getLifetimeStats(region: string, name: string, tag: string)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getPlayerStats(region: string, name: string, tag: string, mode?)</code></li>
+      <li><strong>Match Data:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getMatch(matchId: string)</code></li>
+      <li><strong>Leaderboards:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getLeaderboard(options: { region: string, size?: number, startIndex?: number })</code></li>
+      <li><strong>Game Data:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getAgents(language?)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getWeapons(language?)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getMaps(language?)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">getStatus(region?)</code></li>
+    </ul>
+  </div>
 
-#### Methods
-
-- Account: `getAccount(name: string, tag: string)`
-- MMR: `getMMR(name: string, tag: string, options?: { region?: string })`
-- Match History: `getMatchHistory(region: string, name: string, tag: string, options?)`
-- Stats: `getLifetimeStats(region: string, name: string, tag: string)`, `getPlayerStats(region: string, name: string, tag: string, mode?)`
-- Match Data: `getMatch(matchId: string)`
-- Leaderboards: `getLeaderboard(options: { region: string, size?: number, startIndex?: number })`
-- Game Data: `getAgents(language?)`, `getWeapons(language?)`, `getMaps(language?)`, `getStatus(region?)`
-
-### DeepSeek
-
-Client for interacting with DeepSeek's AI models.
-
-#### Constructor
-
-```typescript
+  <div>
+    <h3 class="text-xl font-semibold mb-2 text-primary-600 dark:text-primary-400">DeepSeek</h3>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">
+      Client for interacting with DeepSeek's AI models.
+    </p>
+    
+    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Constructor</h4>
+    <div class="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-4">
+      <pre class="p-4 overflow-x-auto text-sm font-mono">
 new DeepSeek(config: {
   apiKey: string;      // DeepSeek API key
   baseUrl?: string;    // API base URL (default: 'https://api.deepseek.com/v1')
 })
-```
+      </pre>
+    </div>
+    
+    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Methods</h4>
+    <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300">
+      <li><strong>Chat:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">createChatCompletion(options)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">createStreamingChatCompletion(options, onData, onError?, onEnd?)</code></li>
+      <li><strong>Completions:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">createCompletion(options)</code></li>
+      <li><strong>Embeddings:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">createEmbeddings(options)</code></li>
+      <li><strong>Helper Methods:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">chat(prompt, systemPrompt?, model?)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">conversation(messages, model?)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">generateCode(prompt, options?)</code></li>
+      <li><strong>Models:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">listModels()</code></li>
+    </ul>
+  </div>
 
-#### Methods
-
-- Chat: `createChatCompletion(options)`, `createStreamingChatCompletion(options, onData, onError?, onEnd?)`
-- Completions: `createCompletion(options)`
-- Embeddings: `createEmbeddings(options)`
-- Helper Methods: `chat(prompt, systemPrompt?, model?)`, `conversation(messages, model?)`, `generateCode(prompt, options?)`
-- Models: `listModels()`
-
-### ChatGPT
-
-Client for interacting with OpenAI's models.
-
-#### Constructor
-
-```typescript
+  <div>
+    <h3 class="text-xl font-semibold mb-2 text-primary-600 dark:text-primary-400">ChatGPT</h3>
+    <p class="text-gray-700 dark:text-gray-300 mb-4">
+      Client for interacting with OpenAI's models.
+    </p>
+    
+    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Constructor</h4>
+    <div class="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-4">
+      <pre class="p-4 overflow-x-auto text-sm font-mono">
 new ChatGPT(config: {
   apiKey: string;           // OpenAI API key
   organizationId?: string;  // OpenAI organization ID
   baseUrl?: string;         // API base URL (default: 'https://api.openai.com/v1')
 })
-```
-
-#### Methods
-
-- Chat: `createChatCompletion(options)`, `createStreamingChatCompletion(options, onData, onError?, onEnd?)`
-- Embeddings: `createEmbeddings(options)`, `embed(text, model?)`
-- Helper Methods: `chat(prompt, systemPrompt?, model?)`, `conversation(messages, model?)`, `withFunctions(prompt, functions, model?)`, `withTools(prompt, tools, model?)`
-- Models: `listModels()`
+      </pre>
+    </div>
+    
+    <h4 class="font-medium mb-2 text-gray-800 dark:text-gray-200">Methods</h4>
+    <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300">
+      <li><strong>Chat:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">createChatCompletion(options)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">createStreamingChatCompletion(options, onData, onError?, onEnd?)</code></li>
+      <li><strong>Embeddings:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">createEmbeddings(options)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">embed(text, model?)</code></li>
+      <li><strong>Helper Methods:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">chat(prompt, systemPrompt?, model?)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">conversation(messages, model?)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">withFunctions(prompt, functions, model?)</code>, <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">withTools(prompt, tools, model?)</code></li>
+      <li><strong>Models:</strong> <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-sm font-mono">listModels()</code></li>
+    </ul>
+  </div>
+</div>
 
 ## License
 
-Apache License 2.0. See the [LICENSE](https://github.com/cptcr/macro_api/blob/main/LICENSE) file for details.
+<div class="mb-6 text-gray-700 dark:text-gray-300">
+Apache License 2.0. See the <a href="https://github.com/cptcr/macro_api/blob/main/LICENSE" class="text-primary-600 dark:text-primary-400 hover:underline">LICENSE</a> file for details.
+</div>
 
 ## Contributing
 
+<div class="mb-6 text-gray-700 dark:text-gray-300">
 Contributions are welcome! Please feel free to submit a Pull Request.
+</div>
 
 ## Author
 
-- **CPTCR** - [GitHub](https://github.com/cptcr)
-
-## Repository
-
-- [https://github.com/cptcr/macro_api](https://github.com/cptcr/macro_api)
+<div class="mb-6 text-gray-700 dark:text-gray-300">
+<strong class="font-semibold">CPTCR</strong> - <a href="https://github.com/cptcr" class="text

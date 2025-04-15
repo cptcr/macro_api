@@ -1,8 +1,9 @@
 {
   "name": "macro_api",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "A comprehensive API toolkit for various services including YouTube, Spotify, Valorant, DeepSeek, and ChatGPT.",
   "main": "dist/index.js",
+  "homepage": "https://macro-api-nine.vercel.app/",
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
