@@ -1,0 +1,57 @@
+{
+  "name": "macro_api",
+  "version": "2.1.0",
+  "description": "A comprehensive API toolkit for various services including YouTube, Spotify, Valorant, DeepSeek, ChatGPT, and GitHub.",
+  "main": "dist/index.js",
+  "homepage": "https://macro-api-nine.vercel.app/",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "test": "jest",
+    "lint": "eslint . --ext .ts"
+  },
+  "keywords": [
+    "api",
+    "youtube",
+    "spotify",
+    "valorant",
+    "deepseek",
+    "chatgpt",
+    "github",
+    "notion",
+    "paypal",
+    "stripe",
+    "football"
+  ],
+  "author": "cptcr",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/axios": "^0.14.4",
+    "@types/jest": "^29.5.5",
+    "@types/node": "^22.14.1",
+    "@typescript-eslint/eslint-plugin": "^8.30.0",
+    "@typescript-eslint/parser": "^8.30.0",
+    "axios": "^1.8.4",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-node": "^11.1.0",
+    "fs": "^0.0.1-security",
+    "jest": "^29.7.0",
+    "node": "^23.11.0",
+    "querystring": "^0.2.1",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.4.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "types": "dist/index.d.ts"
+}
