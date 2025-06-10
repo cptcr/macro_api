@@ -90,7 +90,7 @@ export interface Deployment {
   meta?: Record<string, unknown>;
   target?: 'production' | 'staging';
   aliasAssigned?: boolean;
-  aliasError?: any;
+  aliasError?: unknown;
   aliasFinal?: string;
   checksState?: 'registered' | 'running' | 'completed';
   checksConclusion?: 'succeeded' | 'failed' | 'skipped' | 'canceled';
@@ -141,11 +141,11 @@ export interface Project {
   priorityHint?: number;
   latestDeployments: Deployment[];
   targets: Record<string, unknown>;
-  lastRollbackTarget?: any;
+  lastRollbackTarget?: unknown;
   hasFloatingAliases: boolean;
   protectionBypass: Record<string, unknown>;
-  passwordProtection?: any;
-  ssoProtection?: any;
+  passwordProtection?: unknown;
+  ssoProtection?: unknown;
   gitLFS: boolean;
   crons?: {
     enabledAt: number;
@@ -236,43 +236,49 @@ export class VercelAPI {
   }
 
   private async request<T>(
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
-  endpoint: string,
-  data?: Record<string, unknown>,
-  customHeaders?: Record<string, string>
-): Promise<T> {
-  try {
-    const headers = {
-      'Authorization': `Bearer ${this.accessToken}`,
-      'Content-Type': 'application/json',
-      ...customHeaders
-    };
+    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+    endpoint: string,
+    data?: Record<string, unknown>,
+    customHeaders?: Record<string, string>
+  ): Promise<T> {
+    try {
+      const headers = {
+        'Authorization': `Bearer ${this.accessToken}`,
+        'Content-Type': 'application/json',
+        ...customHeaders
+      };
 
-    const url = new URL(`${this.baseUrl}${endpoint}`);
-    if (this.teamId) {
-      url.searchParams.set('teamId', this.teamId);
+      const url = new URL(`${this.baseUrl}${endpoint}`);
+      if (this.teamId) {
+        url.searchParams.set('teamId', this.teamId);
+      }
+
+      const response: AxiosResponse<T> = await axios({
+        method,
+        url: url.toString(),
+        data,
+        headers,
+        timeout: 60000
+      });
+
+      return response.data;
+    } catch (error: unknown) {
+      this.handleVercelError(error);
+      throw error;
     }
-
-    const response: AxiosResponse<T> = await axios({
-      method,
-      url: url.toString(),
-      data,
-      headers,
-      timeout: 60000
-    });
-
-    return response.data;
-  } catch (error: unknown) {
-    this.handleVercelError(error);
-    throw error;
   }
-}
 
   private handleVercelError(error: unknown): void {
-    if (error.response?.data?.error) {
-      const vercelError = error.response.data.error;
-      throw new Error(`Vercel API Error: ${vercelError.message || vercelError.code || 'Unknown error'}`);
+    if (axios.isAxiosError(error) && error.response?.data) {
+      const errorData = error.response.data as Record<string, unknown>;
+      const vercelError = errorData.error as Record<string, unknown> | undefined;
+      
+      if (vercelError) {
+        const message = vercelError.message || vercelError.code || 'Unknown error';
+        throw new Error(`Vercel API Error: ${message}`);
+      }
     }
+    throw error;
   }
 
   /**
@@ -289,15 +295,17 @@ export class VercelAPI {
     };
 
     if (options.gitSource) {
-      deploymentData.gitSource = {
+      const gitSourceData: Record<string, unknown> = {
         type: options.gitSource.type,
         repo: options.gitSource.repo,
         ref: options.gitSource.ref || 'main'
       };
       
       if (options.gitSource.sha) {
-        deploymentData.gitSource.sha = options.gitSource.sha;
+        gitSourceData.sha = options.gitSource.sha;
       }
+      
+      deploymentData.gitSource = gitSourceData;
     }
 
     if (options.files && options.files.length > 0) {
@@ -356,13 +364,13 @@ export class VercelAPI {
     state?: 'BUILDING' | 'ERROR' | 'INITIALIZING' | 'QUEUED' | 'READY' | 'CANCELED';
     target?: 'production' | 'staging';
   }): Promise<{ deployments: Deployment[] }> {
-    const params: Record<string, unknown> = {};
+    const params: Record<string, string> = {};
     
     if (options?.app) params.app = options.app;
-    if (options?.from) params.from = options.from;
-    if (options?.limit) params.limit = options.limit;
-    if (options?.since) params.since = options.since;
-    if (options?.until) params.until = options.until;
+    if (options?.from) params.from = options.from.toString();
+    if (options?.limit) params.limit = options.limit.toString();
+    if (options?.since) params.since = options.since.toString();
+    if (options?.until) params.until = options.until.toString();
     if (options?.state) params.state = options.state;
     if (options?.target) params.target = options.target;
 
@@ -394,10 +402,10 @@ export class VercelAPI {
     limit?: number;
     search?: string;
   }): Promise<{ projects: Project[] }> {
-    const params: Record<string, unknown> = {};
+    const params: Record<string, string> = {};
     
-    if (options?.from) params.from = options.from;
-    if (options?.limit) params.limit = options.limit;
+    if (options?.from) params.from = options.from.toString();
+    if (options?.limit) params.limit = options.limit.toString();
     if (options?.search) params.search = options.search;
 
     const queryString = new URLSearchParams(params).toString();
@@ -553,13 +561,13 @@ export class VercelAPI {
     since?: number;
     until?: number;
   }): Promise<LogEntry[]> {
-    const params: Record<string, unknown> = {};
+    const params: Record<string, string> = {};
     
     if (options?.direction) params.direction = options.direction;
-    if (options?.follow !== undefined) params.follow = options.follow;
-    if (options?.limit) params.limit = options.limit;
-    if (options?.since) params.since = options.since;
-    if (options?.until) params.until = options.until;
+    if (options?.follow !== undefined) params.follow = options.follow.toString();
+    if (options?.limit) params.limit = options.limit.toString();
+    if (options?.since) params.since = options.since.toString();
+    if (options?.until) params.until = options.until.toString();
 
     const queryString = new URLSearchParams(params).toString();
     const endpoint = queryString 
@@ -572,7 +580,7 @@ export class VercelAPI {
   /**
    * Get deployment files
    */
-  async getDeploymentFiles(deploymentId: string): Promise<any[]> {
+  async getDeploymentFiles(deploymentId: string): Promise<Record<string, unknown>[]> {
     const response = await this.request<{ files: Record<string, unknown>[] }>('GET', `/v6/deployments/${deploymentId}/files`);
     return response.files;
   }
@@ -656,6 +664,3 @@ export class VercelAPI {
     throw new Error(`Deployment ${deploymentId} did not complete within ${timeout}ms`);
   }
 }
-
-
-

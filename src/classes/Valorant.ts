@@ -47,8 +47,12 @@ export class Valorant {
       });
       return response.data;
     } catch (error: unknown) {
-      if (error.response && error.response.data) {
-        throw new Error(`Valorant API Error: ${JSON.stringify(error.response.data)}`);
+      if (axios.isAxiosError(error) && error.response?.data) {
+        const errorData = error.response.data as Record<string, unknown>;
+        const errorMessage = typeof errorData.message === 'string' 
+          ? errorData.message 
+          : JSON.stringify(errorData);
+        throw new Error(`Valorant API Error: ${errorMessage}`);
       }
       throw error;
     }
@@ -186,7 +190,7 @@ export class Valorant {
       const account = await this.getAccount(name, tag);
       
       // Get recent matches
-      const matches = await this.getMatchHistory(region, name, tag, { queue: 'competitive' as any });
+      const matches = await this.getMatchHistory(region, name, tag, { queue: 'competitive' as ValorantMatchHistoryOptions['queue'] });
       
       if (!matches || matches.length === 0) {
         return { error: 'No recent matches found' };
@@ -195,7 +199,7 @@ export class Valorant {
       // Calculate stats from matches
       const stats = this.calculateStats(matches, account.name);
       return stats;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error getting player stats:', error);
       throw error;
     }
@@ -206,7 +210,7 @@ export class Valorant {
    * @param matches Array of match data
    * @param playerName Player name to filter for
    */
-  private calculateStats(matches: Record<string, unknown>[], playerName: string): any {
+  private calculateStats(matches: Record<string, unknown>[], playerName: string): Record<string, unknown> {
     let kills = 0;
     let deaths = 0;
     let assists = 0;
@@ -218,37 +222,60 @@ export class Valorant {
     const mapsPlayed: Record<string, number> = {};
     
     matches.forEach(match => {
-      const playerData = match.players.all_players.find((p: any) => 
-        p.name.toLowerCase() === playerName.toLowerCase());
+      // Type-safe access to match properties
+      const players = match.players as { all_players?: Record<string, unknown>[] } | undefined;
+      const teams = match.teams as { winner?: string } | undefined;
+      const metadata = match.metadata as { map?: string } | undefined;
+      
+      const allPlayers = players?.all_players || [];
+      const playerData = allPlayers.find((p: Record<string, unknown>) => {
+        const name = p.name as string | undefined;
+        return name && name.toLowerCase() === playerName.toLowerCase();
+      }) as Record<string, unknown> | undefined;
       
       if (playerData) {
         games++;
-        kills += playerData.stats.kills;
-        deaths += playerData.stats.deaths;
-        assists += playerData.stats.assists;
         
-        if (playerData.team === match.teams.winner) {
+        // Safely access stats
+        const stats = playerData.stats as { 
+          kills?: number; 
+          deaths?: number; 
+          assists?: number;
+          headshots?: number;
+          bodyshots?: number;
+          legshots?: number;
+        } | undefined;
+        
+        const team = playerData.team as string | undefined;
+        const character = playerData.character as string | undefined;
+        
+        if (stats) {
+          kills += stats.kills || 0;
+          deaths += stats.deaths || 0;
+          assists += stats.assists || 0;
+          
+          if (stats.headshots) {
+            headshots += stats.headshots;
+          }
+          
+          // Track total shots if available
+          if (stats.bodyshots && stats.legshots && stats.headshots) {
+            totalShots += stats.bodyshots + stats.legshots + stats.headshots;
+          }
+        }
+        
+        if (team && teams?.winner && team === teams.winner) {
           wins++;
         }
         
-        // Track headshots if available
-        if (playerData.stats.headshots) {
-          headshots += playerData.stats.headshots;
-        }
-        
-        // Track total shots if available
-        if (playerData.stats.bodyshots && playerData.stats.legshots && playerData.stats.headshots) {
-          totalShots += playerData.stats.bodyshots + playerData.stats.legshots + playerData.stats.headshots;
-        }
-        
         // Track agents played
-        if (playerData.character) {
-          agentsPlayed[playerData.character] = (agentsPlayed[playerData.character] || 0) + 1;
+        if (character) {
+          agentsPlayed[character] = (agentsPlayed[character] || 0) + 1;
         }
         
         // Track maps played
-        if (match.metadata && match.metadata.map) {
-          mapsPlayed[match.metadata.map] = (mapsPlayed[match.metadata.map] || 0) + 1;
+        if (metadata?.map) {
+          mapsPlayed[metadata.map] = (mapsPlayed[metadata.map] || 0) + 1;
         }
       }
     });
@@ -288,6 +315,3 @@ export class Valorant {
     };
   }
 }
-
-
-

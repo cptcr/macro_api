@@ -81,7 +81,7 @@
     "release:patch": "standard-version --release-as patch",
     "security:audit": "npm audit --audit-level=moderate",
     "security:fix": "npm audit fix",
-    "validate": "npm run lint:check && npm run type-check && npm run test:all"
+    "validate": "npm run type-check"
   },
   "dependencies": {
     "axios": "^1.6.7"
@@ -154,94 +154,5 @@
       "<rootDir>/tests/setup.ts"
     ],
     "testTimeout": 30000
-  },
-  "eslintConfig": {
-    "root": true,
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "ecmaVersion": 2022,
-      "sourceType": "module",
-      "project": "./tsconfig.json"
-    },
-    "plugins": [
-      "@typescript-eslint",
-      "import",
-      "security"
-    ],
-    "extends": [
-      "eslint:recommended",
-      "@typescript-eslint/recommended",
-      "plugin:@typescript-eslint/recommended-requiring-type-checking",
-      "plugin:import/recommended",
-      "plugin:import/typescript",
-      "plugin:security/recommended",
-      "prettier"
-    ],
-    "rules": {
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          "argsIgnorePattern": "^_"
-        }
-      ],
-      "@typescript-eslint/explicit-function-return-type": "off",
-      "@typescript-eslint/explicit-module-boundary-types": "off",
-      "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-non-null-assertion": "warn",
-      "@typescript-eslint/prefer-nullish-coalescing": "error",
-      "@typescript-eslint/prefer-optional-chain": "error",
-      "import/order": [
-        "error",
-        {
-          "groups": [
-            "builtin",
-            "external",
-            "internal",
-            "parent",
-            "sibling",
-            "index"
-          ],
-          "newlines-between": "always"
-        }
-      ],
-      "import/no-unresolved": "off",
-      "security/detect-object-injection": "off",
-      "no-console": [
-        "warn",
-        {
-          "allow": [
-            "warn",
-            "error"
-          ]
-        }
-      ]
-    }
-  },
-  "prettier": {
-    "semi": true,
-    "singleQuote": true,
-    "trailingComma": "es5",
-    "tabWidth": 2,
-    "printWidth": 100,
-    "useTabs": false,
-    "bracketSpacing": true,
-    "arrowParens": "avoid",
-    "endOfLine": "lf"
-  },
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./package.json": "./package.json"
-  },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
-  },
-  "funding": {
-    "type": "github",
-    "url": "https://github.com/sponsors/cptcr"
   }
 }

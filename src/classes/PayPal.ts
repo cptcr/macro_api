@@ -63,7 +63,7 @@ export class PayPalAPI {
   private async request<T>(
     method: 'get' | 'post' | 'put' | 'patch' | 'delete',
     endpoint: string,
-    data?: Record<string, unknown>,
+    data?: Record<string, unknown> | FormData,
     params?: Record<string, unknown>
   ): Promise<T> {
     const token = await this.getAccessToken();
@@ -154,7 +154,7 @@ export class PayPalAPI {
   async updateOrder(orderId: string, data: Array<{
     op: 'add' | 'replace' | 'remove';
     path: string;
-    value?: any;
+    value?: unknown;
   }>) {
     return this.request<Record<string, unknown>>('patch', `/v2/checkout/orders/${orderId}`, toRequestData(data));
   }
@@ -402,7 +402,7 @@ export class PayPalAPI {
    * @param invoiceId Invoice ID
    * @param data Invoice data (same as createInvoice)
    */
-  async updateInvoice(invoiceId: string, data: any) {
+  async updateInvoice(invoiceId: string, data: Parameters<PayPalAPI['createInvoice']>[0]) {
     return this.request<Record<string, unknown>>('put', `/v2/invoicing/invoices/${invoiceId}`, data);
   }
 
@@ -454,4 +454,20 @@ export class PayPalAPI {
       end?: string;
     };
     invoice_number?: string;
-    status?: '
+    status?: 'DRAFT' | 'SENT' | 'SCHEDULED' | 'PAID' | 'MARKED_AS_PAID' | 'CANCELLED' | 'REFUNDED' | 'PARTIALLY_PAID' | 'PARTIALLY_REFUNDED' | 'MARKED_AS_REFUNDED' | 'UNPAID' | 'PAYMENT_PENDING';
+    reference?: string;
+    recipient_email?: string;
+    recipient_business_name?: string;
+    recipient_first_name?: string;
+    recipient_last_name?: string;
+    memo?: string;
+    currency_code?: string;
+    archived?: boolean;
+    fields?: string[];
+    page?: number;
+    page_size?: number;
+    total_count_required?: boolean;
+  }): Promise<Record<string, unknown>> {
+    return this.request<Record<string, unknown>>('post', '/v2/invoicing/search', data);
+  }
+}

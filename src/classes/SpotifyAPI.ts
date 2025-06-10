@@ -2,6 +2,7 @@ import axios from 'axios';
 import SpotifyAuthOptions from '../interfaces/SpotifyAPI/SpotifyAuthOptions';
 import SpotifyTokenResponse from '../interfaces/SpotifyAPI/SpotifyTokenResponse';
 import SpotifyPaginationParams from '../interfaces/SpotifyAPI/SpotifyPaginationParams';
+import { toPaginationParams } from '../utils/errorHandling'; // Add this import
 
 /**
  * Complete Spotify API wrapper for interacting with all Spotify endpoints
@@ -225,7 +226,7 @@ export class SpotifyAPI {
    * @param params Pagination parameters
    */
   async getAlbumTracks(albumId: string, params?: SpotifyPaginationParams) {
-    return this.request<Record<string, unknown>>('get', `/albums/${albumId}/tracks`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/albums/${albumId}/tracks`, undefined, toPaginationParams(params));
   }
 
   // Artist endpoints
@@ -247,7 +248,7 @@ export class SpotifyAPI {
     include_groups?: string;
     market?: string;
   }) {
-    return this.request<Record<string, unknown>>('get', `/artists/${artistId}/albums`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/artists/${artistId}/albums`, undefined, toPaginationParams(params));
   }
 
   /**
@@ -275,7 +276,7 @@ export class SpotifyAPI {
    * @param params Pagination parameters
    */
   async getPlaylistTracks(playlistId: string, params?: SpotifyPaginationParams) {
-    return this.request<Record<string, unknown>>('get', `/playlists/${playlistId}/tracks`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/playlists/${playlistId}/tracks`, undefined, toPaginationParams(params));
   }
 
   /**
@@ -348,7 +349,7 @@ export class SpotifyAPI {
     return this.request<Record<string, unknown>>('get', '/search', undefined, {
       q: query,
       type: types.join(','),
-      ...params
+      ...toPaginationParams(params)
     });
   }
 
@@ -363,7 +364,7 @@ export class SpotifyAPI {
     seed_tracks?: string[];
     seed_genres?: string[];
     limit?: number;
-    [key: string]: any;
+    [key: string]: unknown;
   }) {
     // Convert arrays to comma-separated strings
     const queryParams: Record<string, unknown> = { ...params };
@@ -374,5 +375,3 @@ export class SpotifyAPI {
     return this.request<Record<string, unknown>>('get', '/recommendations', undefined, queryParams);
   }
 }
-
-

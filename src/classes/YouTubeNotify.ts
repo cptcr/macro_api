@@ -3,6 +3,34 @@ import NotificationOptions from '../interfaces/YouTube/NotificationOptions';
 import YouTubeVideo from '../interfaces/YouTube/YouTubeVideo';
 
 /**
+ * Interface for YouTube API response items
+ */
+interface YouTubeSearchItem {
+  id: {
+    videoId: string;
+  };
+  snippet: {
+    title: string;
+    channelId: string;
+    channelTitle: string;
+    publishedAt: string;
+    description: string;
+    thumbnails: {
+      high?: { url: string };
+      default?: { url: string };
+      medium?: { url: string };
+    };
+  };
+}
+
+/**
+ * Interface for YouTube API search response
+ */
+interface YouTubeSearchResponse {
+  items?: YouTubeSearchItem[];
+}
+
+/**
  * YouTube notification system that monitors channels and sends notifications to Discord via webhooks
  */
 export class YouTubeNotify {
@@ -104,21 +132,31 @@ export class YouTubeNotify {
       key: this.apiKey
     };
 
-    const response = await axios.get(url, { params });
+    const response = await axios.get<YouTubeSearchResponse>(url, { params });
     
     if (!response.data.items) {
       return [];
     }
 
-    return response.data.items.map((item: Record<string, unknown>) => ({
-      videoId: item.id.videoId,
-      title: item.snippet.title,
-      channelId: item.snippet.channelId,
-      channelTitle: item.snippet.channelTitle,
-      publishedAt: item.snippet.publishedAt,
-      description: item.snippet.description,
-      thumbnailUrl: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url
-    }));
+    return response.data.items.map((item: YouTubeSearchItem) => {
+      // Type-safe property access with proper validation
+      const videoId = item.id?.videoId;
+      const snippet = item.snippet;
+      
+      if (!videoId || !snippet) {
+        throw new Error('Invalid YouTube API response structure');
+      }
+
+      return {
+        videoId,
+        title: snippet.title || 'Untitled',
+        channelId: snippet.channelId || this.channelId,
+        channelTitle: snippet.channelTitle || 'Unknown Channel',
+        publishedAt: snippet.publishedAt || new Date().toISOString(),
+        description: snippet.description || '',
+        thumbnailUrl: snippet.thumbnails?.high?.url || snippet.thumbnails?.default?.url || ''
+      };
+    });
   }
 
   /**
@@ -191,4 +229,3 @@ export class YouTubeNotify {
     }
   }
 }
-
