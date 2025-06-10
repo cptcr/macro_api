@@ -3,3 +3,4 @@ export default interface ValorantMatchHistoryOptions {
     startIndex?: number;
     endIndex?: number;
 }
+

@@ -3,3 +3,4 @@ export default interface SpotifyAuthOptions {
     clientSecret: string;
     redirectUri?: string;
 }
+

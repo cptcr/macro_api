@@ -13,3 +13,4 @@ export default interface NotionAuthOptions {
      */
     version?: string;
   }
+

@@ -87,7 +87,7 @@ export interface Deployment {
     email: string;
   };
   inspectorUrl?: string;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
   target?: 'production' | 'staging';
   aliasAssigned?: boolean;
   aliasError?: any;
@@ -140,10 +140,10 @@ export interface Project {
   gitForkProtection: boolean;
   priorityHint?: number;
   latestDeployments: Deployment[];
-  targets: Record<string, any>;
+  targets: Record<string, unknown>;
   lastRollbackTarget?: any;
   hasFloatingAliases: boolean;
-  protectionBypass: Record<string, any>;
+  protectionBypass: Record<string, unknown>;
   passwordProtection?: any;
   ssoProtection?: any;
   gitLFS: boolean;
@@ -238,7 +238,7 @@ export class VercelAPI {
   private async request<T>(
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
     endpoint: string,
-    data?: any,
+    data?: Record<string, unknown>,
     customHeaders?: Record<string, string>
   ): Promise<T> {
     try {
@@ -262,13 +262,13 @@ export class VercelAPI {
       });
 
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.handleVercelError(error);
       throw error;
     }
   }
 
-  private handleVercelError(error: any): void {
+  private handleVercelError(error: unknown): void {
     if (error.response?.data?.error) {
       const vercelError = error.response.data.error;
       throw new Error(`Vercel API Error: ${vercelError.message || vercelError.code || 'Unknown error'}`);
@@ -283,7 +283,7 @@ export class VercelAPI {
       throw new Error('Either deployment name or git source is required');
     }
 
-    const deploymentData: any = {
+    const deploymentData: Record<string, unknown> = {
       name: options.name,
       deploymentId: this.generateDeploymentId()
     };
@@ -356,7 +356,7 @@ export class VercelAPI {
     state?: 'BUILDING' | 'ERROR' | 'INITIALIZING' | 'QUEUED' | 'READY' | 'CANCELED';
     target?: 'production' | 'staging';
   }): Promise<{ deployments: Deployment[] }> {
-    const params: any = {};
+    const params: Record<string, unknown> = {};
     
     if (options?.app) params.app = options.app;
     if (options?.from) params.from = options.from;
@@ -394,7 +394,7 @@ export class VercelAPI {
     limit?: number;
     search?: string;
   }): Promise<{ projects: Project[] }> {
-    const params: any = {};
+    const params: Record<string, unknown> = {};
     
     if (options?.from) params.from = options.from;
     if (options?.limit) params.limit = options.limit;
@@ -424,7 +424,7 @@ export class VercelAPI {
       type: 'github' | 'gitlab' | 'bitbucket';
     };
   }): Promise<Project> {
-    const projectData: any = { name };
+    const projectData: Record<string, unknown> = { name };
     
     if (options) {
       Object.assign(projectData, options);
@@ -520,7 +520,7 @@ export class VercelAPI {
     redirect?: string;
     redirectStatusCode?: number;
   }): Promise<Domain> {
-    const domainData: any = { name };
+    const domainData: Record<string, unknown> = { name };
     
     if (options) {
       Object.assign(domainData, options);
@@ -553,7 +553,7 @@ export class VercelAPI {
     since?: number;
     until?: number;
   }): Promise<LogEntry[]> {
-    const params: any = {};
+    const params: Record<string, unknown> = {};
     
     if (options?.direction) params.direction = options.direction;
     if (options?.follow !== undefined) params.follow = options.follow;
@@ -573,25 +573,25 @@ export class VercelAPI {
    * Get deployment files
    */
   async getDeploymentFiles(deploymentId: string): Promise<any[]> {
-    const response = await this.request<{ files: any[] }>('GET', `/v6/deployments/${deploymentId}/files`);
+    const response = await this.request<{ files: Record<string, unknown>[] }>('GET', `/v6/deployments/${deploymentId}/files`);
     return response.files;
   }
 
   /**
    * Get current user/team information
    */
-  async getCurrentUser(): Promise<any> {
-    return this.request<any>('GET', '/v2/user');
+  async getCurrentUser(): Promise<Record<string, unknown>> {
+    return this.request<Record<string, unknown>>('GET', '/v2/user');
   }
 
   /**
    * Get team information (if using team token)
    */
-  async getTeam(): Promise<any> {
+  async getTeam(): Promise<Record<string, unknown>> {
     if (!this.teamId) {
       throw new Error('Team ID is required for team operations');
     }
-    return this.request<any>('GET', `/v2/teams/${this.teamId}`);
+    return this.request<Record<string, unknown>>('GET', `/v2/teams/${this.teamId}`);
   }
 
   /**
@@ -656,3 +656,6 @@ export class VercelAPI {
     throw new Error(`Deployment ${deploymentId} did not complete within ${timeout}ms`);
   }
 }
+
+
+

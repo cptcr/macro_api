@@ -27,8 +27,8 @@ export class GitHubAPI {
   private async request<T>(
     method: 'get' | 'post' | 'put' | 'patch' | 'delete',
     endpoint: string,
-    data?: any,
-    params?: any
+    data?: Record<string, unknown>,
+    params?: Record<string, unknown>
   ): Promise<T> {
     const response = await axios({
       method,
@@ -51,7 +51,7 @@ export class GitHubAPI {
    * Get authenticated user information
    */
   async getAuthenticatedUser() {
-    return this.request<any>('get', '/user');
+    return this.request<Record<string, unknown>>('get', '/user');
   }
 
   /**
@@ -59,7 +59,7 @@ export class GitHubAPI {
    * @param username GitHub username
    */
   async getUser(username: string) {
-    return this.request<any>('get', `/users/${username}`);
+    return this.request<Record<string, unknown>>('get', `/users/${username}`);
   }
 
   /**
@@ -72,7 +72,7 @@ export class GitHubAPI {
     sort?: 'created' | 'updated' | 'pushed' | 'full_name';
     direction?: 'asc' | 'desc';
   }) {
-    return this.request<any>('get', `/users/${username}/repos`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/users/${username}/repos`, undefined, params);
   }
 
   /**
@@ -81,7 +81,7 @@ export class GitHubAPI {
    * @param params Pagination parameters
    */
   async getUserOrgs(username: string, params?: GitHubPaginationParams) {
-    return this.request<any>('get', `/users/${username}/orgs`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/users/${username}/orgs`, undefined, params);
   }
 
   // Repository endpoints
@@ -92,7 +92,7 @@ export class GitHubAPI {
    * @param repo Repository name
    */
   async getRepo(owner: string, repo: string) {
-    return this.request<any>('get', `/repos/${owner}/${repo}`);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}`);
   }
 
   /**
@@ -117,7 +117,7 @@ export class GitHubAPI {
     delete_branch_on_merge?: boolean;
   }, org?: string) {
     const endpoint = org ? `/orgs/${org}/repos` : '/user/repos';
-    return this.request<any>('post', endpoint, data);
+    return this.request<Record<string, unknown>>('post', endpoint, data);
   }
 
   /**
@@ -140,7 +140,7 @@ export class GitHubAPI {
     allow_rebase_merge?: boolean;
     delete_branch_on_merge?: boolean;
   }) {
-    return this.request<any>('patch', `/repos/${owner}/${repo}`, data);
+    return this.request<Record<string, unknown>>('patch', `/repos/${owner}/${repo}`, data);
   }
 
   /**
@@ -149,7 +149,7 @@ export class GitHubAPI {
    * @param repo Repository name
    */
   async deleteRepo(owner: string, repo: string) {
-    return this.request<any>('delete', `/repos/${owner}/${repo}`);
+    return this.request<Record<string, unknown>>('delete', `/repos/${owner}/${repo}`);
   }
 
   /**
@@ -159,7 +159,7 @@ export class GitHubAPI {
    * @param params Pagination parameters
    */
   async getRepoBranches(owner: string, repo: string, params?: GitHubPaginationParams) {
-    return this.request<any>('get', `/repos/${owner}/${repo}/branches`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/branches`, undefined, params);
   }
 
   /**
@@ -169,7 +169,7 @@ export class GitHubAPI {
    * @param branch Branch name
    */
   async getBranch(owner: string, repo: string, branch: string) {
-    return this.request<any>('get', `/repos/${owner}/${repo}/branches/${branch}`);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/branches/${branch}`);
   }
 
   // Content endpoints
@@ -182,7 +182,7 @@ export class GitHubAPI {
    * @param ref Git reference (branch, tag, or commit SHA)
    */
   async getContents(owner: string, repo: string, path: string, ref?: string) {
-    return this.request<any>('get', `/repos/${owner}/${repo}/contents/${path}`, undefined, { ref });
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/contents/${path}`, undefined, { ref });
   }
 
   /**
@@ -206,7 +206,7 @@ export class GitHubAPI {
       email: string;
     };
   }) {
-    return this.request<any>('put', `/repos/${owner}/${repo}/contents/${path}`, data);
+    return this.request<Record<string, unknown>>('put', `/repos/${owner}/${repo}/contents/${path}`, data);
   }
 
   /**
@@ -229,7 +229,7 @@ export class GitHubAPI {
       email: string;
     };
   }) {
-    return this.request<any>('delete', `/repos/${owner}/${repo}/contents/${path}`, data);
+    return this.request<Record<string, unknown>>('delete', `/repos/${owner}/${repo}/contents/${path}`, data);
   }
 
   // Pull Request endpoints
@@ -249,7 +249,7 @@ export class GitHubAPI {
     per_page?: number;
     page?: number;
   }) {
-    return this.request<any>('get', `/repos/${owner}/${repo}/pulls`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/pulls`, undefined, params);
   }
 
   /**
@@ -259,7 +259,7 @@ export class GitHubAPI {
    * @param pullNumber Pull request number
    */
   async getPullRequest(owner: string, repo: string, pullNumber: number) {
-    return this.request<any>('get', `/repos/${owner}/${repo}/pulls/${pullNumber}`);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/pulls/${pullNumber}`);
   }
 
   /**
@@ -276,7 +276,7 @@ export class GitHubAPI {
     draft?: boolean;
     maintainer_can_modify?: boolean;
   }) {
-    return this.request<any>('post', `/repos/${owner}/${repo}/pulls`, data);
+    return this.request<Record<string, unknown>>('post', `/repos/${owner}/${repo}/pulls`, data);
   }
 
   /**
@@ -293,7 +293,7 @@ export class GitHubAPI {
     base?: string;
     maintainer_can_modify?: boolean;
   }) {
-    return this.request<any>('patch', `/repos/${owner}/${repo}/pulls/${pullNumber}`, data);
+    return this.request<Record<string, unknown>>('patch', `/repos/${owner}/${repo}/pulls/${pullNumber}`, data);
   }
 
   /**
@@ -309,7 +309,7 @@ export class GitHubAPI {
     sha?: string;
     merge_method?: 'merge' | 'squash' | 'rebase';
   }) {
-    return this.request<any>('put', `/repos/${owner}/${repo}/pulls/${pullNumber}/merge`, data);
+    return this.request<Record<string, unknown>>('put', `/repos/${owner}/${repo}/pulls/${pullNumber}/merge`, data);
   }
 
   // Issues endpoints
@@ -332,7 +332,7 @@ export class GitHubAPI {
     per_page?: number;
     page?: number;
   }) {
-    return this.request<any>('get', `/repos/${owner}/${repo}/issues`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/issues`, undefined, params);
   }
 
   /**
@@ -342,7 +342,7 @@ export class GitHubAPI {
    * @param issueNumber Issue number
    */
   async getIssue(owner: string, repo: string, issueNumber: number) {
-    return this.request<any>('get', `/repos/${owner}/${repo}/issues/${issueNumber}`);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/issues/${issueNumber}`);
   }
 
   /**
@@ -359,7 +359,7 @@ export class GitHubAPI {
     labels?: string[];
     assignee?: string;
   }) {
-    return this.request<any>('post', `/repos/${owner}/${repo}/issues`, data);
+    return this.request<Record<string, unknown>>('post', `/repos/${owner}/${repo}/issues`, data);
   }
 
   /**
@@ -378,7 +378,7 @@ export class GitHubAPI {
     labels?: string[];
     assignee?: string;
   }) {
-    return this.request<any>('patch', `/repos/${owner}/${repo}/issues/${issueNumber}`, data);
+    return this.request<Record<string, unknown>>('patch', `/repos/${owner}/${repo}/issues/${issueNumber}`, data);
   }
 
   // Comments endpoints
@@ -391,7 +391,7 @@ export class GitHubAPI {
    * @param params Pagination parameters
    */
   async getIssueComments(owner: string, repo: string, issueNumber: number, params?: GitHubPaginationParams) {
-    return this.request<any>('get', `/repos/${owner}/${repo}/issues/${issueNumber}/comments`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/issues/${issueNumber}/comments`, undefined, params);
   }
 
   /**
@@ -404,7 +404,7 @@ export class GitHubAPI {
   async createIssueComment(owner: string, repo: string, issueNumber: number, data: {
     body: string;
   }) {
-    return this.request<any>('post', `/repos/${owner}/${repo}/issues/${issueNumber}/comments`, data);
+    return this.request<Record<string, unknown>>('post', `/repos/${owner}/${repo}/issues/${issueNumber}/comments`, data);
   }
 
   /**
@@ -417,7 +417,7 @@ export class GitHubAPI {
   async updateIssueComment(owner: string, repo: string, commentId: number, data: {
     body: string;
   }) {
-    return this.request<any>('patch', `/repos/${owner}/${repo}/issues/comments/${commentId}`, data);
+    return this.request<Record<string, unknown>>('patch', `/repos/${owner}/${repo}/issues/comments/${commentId}`, data);
   }
 
   /**
@@ -427,7 +427,7 @@ export class GitHubAPI {
    * @param commentId Comment ID
    */
   async deleteIssueComment(owner: string, repo: string, commentId: number) {
-    return this.request<any>('delete', `/repos/${owner}/${repo}/issues/comments/${commentId}`);
+    return this.request<Record<string, unknown>>('delete', `/repos/${owner}/${repo}/issues/comments/${commentId}`);
   }
 
   // Commits and events endpoints
@@ -447,7 +447,7 @@ export class GitHubAPI {
     per_page?: number;
     page?: number;
   }) {
-    return this.request<any>('get', `/repos/${owner}/${repo}/commits`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/commits`, undefined, params);
   }
 
   /**
@@ -457,7 +457,7 @@ export class GitHubAPI {
    * @param sha Commit SHA
    */
   async getCommit(owner: string, repo: string, sha: string) {
-    return this.request<any>('get', `/repos/${owner}/${repo}/commits/${sha}`);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/commits/${sha}`);
   }
 
   /**
@@ -468,7 +468,7 @@ export class GitHubAPI {
    * @param head Head commit
    */
   async compareCommits(owner: string, repo: string, base: string, head: string) {
-    return this.request<any>('get', `/repos/${owner}/${repo}/compare/${base}...${head}`);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/compare/${base}...${head}`);
   }
 
   // Releases endpoints
@@ -480,7 +480,7 @@ export class GitHubAPI {
    * @param params Pagination parameters
    */
   async getReleases(owner: string, repo: string, params?: GitHubPaginationParams) {
-    return this.request<any>('get', `/repos/${owner}/${repo}/releases`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/releases`, undefined, params);
   }
 
   /**
@@ -490,7 +490,7 @@ export class GitHubAPI {
    * @param releaseId Release ID
    */
   async getRelease(owner: string, repo: string, releaseId: number) {
-    return this.request<any>('get', `/repos/${owner}/${repo}/releases/${releaseId}`);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/releases/${releaseId}`);
   }
 
   /**
@@ -507,7 +507,7 @@ export class GitHubAPI {
     draft?: boolean;
     prerelease?: boolean;
   }) {
-    return this.request<any>('post', `/repos/${owner}/${repo}/releases`, data);
+    return this.request<Record<string, unknown>>('post', `/repos/${owner}/${repo}/releases`, data);
   }
 
   // Helper methods for common tasks
@@ -522,7 +522,7 @@ export class GitHubAPI {
     organization?: string;
     name?: string;
   }) {
-    return this.request<any>('post', `/repos/${owner}/${repo}/forks`, options);
+    return this.request<Record<string, unknown>>('post', `/repos/${owner}/${repo}/forks`, options);
   }
 
   /**
@@ -531,7 +531,7 @@ export class GitHubAPI {
    * @param repo Repository name
    */
   async getLatestRelease(owner: string, repo: string) {
-    return this.request<any>('get', `/repos/${owner}/${repo}/releases/latest`);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/releases/latest`);
   }
 
   /**
@@ -541,7 +541,7 @@ export class GitHubAPI {
    * @param ref Git reference (branch, tag, or commit SHA)
    */
   async getReadme(owner: string, repo: string, ref?: string) {
-    return this.request<any>('get', `/repos/${owner}/${repo}/readme`, undefined, { ref });
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/readme`, undefined, { ref });
   }
 
   /**
@@ -555,7 +555,7 @@ export class GitHubAPI {
     per_page?: number;
     page?: number;
   }) {
-    return this.request<any>('get', '/search/repositories', undefined, { 
+    return this.request<Record<string, unknown>>('get', '/search/repositories', undefined, { 
       q: query,
       ...params
     });
@@ -572,7 +572,7 @@ export class GitHubAPI {
     per_page?: number;
     page?: number;
   }) {
-    return this.request<any>('get', '/search/code', undefined, { 
+    return this.request<Record<string, unknown>>('get', '/search/code', undefined, { 
       q: query,
       ...params
     });
@@ -589,9 +589,10 @@ export class GitHubAPI {
     per_page?: number;
     page?: number;
   }) {
-    return this.request<any>('get', '/search/issues', undefined, { 
+    return this.request<Record<string, unknown>>('get', '/search/issues', undefined, { 
       q: query,
       ...params
     });
   }
 }
+

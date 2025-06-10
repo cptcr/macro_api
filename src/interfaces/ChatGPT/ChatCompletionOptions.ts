@@ -13,8 +13,9 @@ export default interface ChatCompletionOptions {
     frequency_penalty?: number;
     logit_bias?: Record<string, number>;
     user?: string;
-    functions?: any[];
+    functions?: Record<string, unknown>[];
     function_call?: 'auto' | 'none' | { name: string };
-    tools?: any[];
+    tools?: Record<string, unknown>[];
     tool_choice?: 'auto' | 'none' | { type: 'function'; function: { name: string } };
 }
+

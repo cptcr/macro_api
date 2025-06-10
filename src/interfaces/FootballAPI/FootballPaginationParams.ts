@@ -12,3 +12,4 @@ export default interface FootballPaginationParams {
      */
     limit?: number;
   }
+

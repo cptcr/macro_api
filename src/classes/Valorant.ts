@@ -39,14 +39,14 @@ export class Valorant {
    * @param endpoint API endpoint
    * @param params Query parameters
    */
-  private async request<T>(endpoint: string, params?: any): Promise<T> {
+  private async request<T>(endpoint: string, params?: Record<string, unknown>): Promise<T> {
     try {
       const response = await axios.get(`${this.baseUrl}${endpoint}`, {
         headers: this.getHeaders(),
         params
       });
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.response && error.response.data) {
         throw new Error(`Valorant API Error: ${JSON.stringify(error.response.data)}`);
       }
@@ -70,9 +70,9 @@ export class Valorant {
    * @param tag Player tag
    * @param options Optional parameters
    */
-  async getMMR(name: string, tag: string, options: ValorantMMROptions = {}): Promise<any> {
+  async getMMR(name: string, tag: string, options: ValorantMMROptions = {}): Promise<Record<string, unknown>> {
     const region = options.region || 'na';
-    const data = await this.request<{ data: any }>(`/v1/mmr/${region}/${name}/${tag}`);
+    const data = await this.request<{ data: Record<string, unknown> }>(`/v1/mmr/${region}/${name}/${tag}`);
     return data.data;
   }
 
@@ -88,9 +88,9 @@ export class Valorant {
     name: string,
     tag: string,
     options: ValorantMatchHistoryOptions = {}
-  ): Promise<any[]> {
+  ): Promise<Record<string, unknown>[]> {
     const endpoint = `/v3/matches/${region}/${name}/${tag}`;
-    const params: any = {};
+    const params: Record<string, unknown> = {};
     
     if (options.queue) {
       params.filter = options.queue;
@@ -100,7 +100,7 @@ export class Valorant {
       params.size = options.endIndex - options.startIndex + 1;
     }
     
-    const data = await this.request<{ data: any[] }>(endpoint, params);
+    const data = await this.request<{ data: Record<string, unknown>[] }>(endpoint, params);
     return data.data;
   }
 
@@ -110,8 +110,8 @@ export class Valorant {
    * @param name Player name
    * @param tag Player tag
    */
-  async getLifetimeStats(region: string, name: string, tag: string): Promise<any> {
-    const data = await this.request<{ data: any }>(`/v1/lifetime/matches/${region}/${name}/${tag}`);
+  async getLifetimeStats(region: string, name: string, tag: string): Promise<Record<string, unknown>> {
+    const data = await this.request<{ data: Record<string, unknown> }>(`/v1/lifetime/matches/${region}/${name}/${tag}`);
     return data.data;
   }
 
@@ -119,8 +119,8 @@ export class Valorant {
    * Get details for a specific match
    * @param matchId Match ID
    */
-  async getMatch(matchId: string): Promise<any> {
-    const data = await this.request<{ data: any }>(`/v2/match/${matchId}`);
+  async getMatch(matchId: string): Promise<Record<string, unknown>> {
+    const data = await this.request<{ data: Record<string, unknown> }>(`/v2/match/${matchId}`);
     return data.data;
   }
 
@@ -128,9 +128,9 @@ export class Valorant {
    * Get current Valorant leaderboard
    * @param options Leaderboard options
    */
-  async getLeaderboard(options: ValorantLeaderboardOptions): Promise<any[]> {
+  async getLeaderboard(options: ValorantLeaderboardOptions): Promise<Record<string, unknown>[]> {
     const { region, size = 100, startIndex = 0 } = options;
-    const data = await this.request<{ data: any[] }>(
+    const data = await this.request<{ data: Record<string, unknown>[] }>(
       `/v1/leaderboard/${region}`,
       { size, startIndex }
     );
@@ -141,8 +141,8 @@ export class Valorant {
    * Get agent information
    * @param language Language code (default: en-US)
    */
-  async getAgents(language: string = 'en-US'): Promise<any[]> {
-    const data = await this.request<{ data: any[] }>(`/v1/agents`, { language });
+  async getAgents(language: string = 'en-US'): Promise<Record<string, unknown>[]> {
+    const data = await this.request<{ data: Record<string, unknown>[] }>(`/v1/agents`, { language });
     return data.data;
   }
 
@@ -150,8 +150,8 @@ export class Valorant {
    * Get weapon information
    * @param language Language code (default: en-US)
    */
-  async getWeapons(language: string = 'en-US'): Promise<any[]> {
-    const data = await this.request<{ data: any[] }>(`/v1/weapons`, { language });
+  async getWeapons(language: string = 'en-US'): Promise<Record<string, unknown>[]> {
+    const data = await this.request<{ data: Record<string, unknown>[] }>(`/v1/weapons`, { language });
     return data.data;
   }
 
@@ -159,8 +159,8 @@ export class Valorant {
    * Get map information
    * @param language Language code (default: en-US)
    */
-  async getMaps(language: string = 'en-US'): Promise<any[]> {
-    const data = await this.request<{ data: any[] }>(`/v1/maps`, { language });
+  async getMaps(language: string = 'en-US'): Promise<Record<string, unknown>[]> {
+    const data = await this.request<{ data: Record<string, unknown>[] }>(`/v1/maps`, { language });
     return data.data;
   }
 
@@ -168,8 +168,8 @@ export class Valorant {
    * Get current Valorant status for a region
    * @param region Region code
    */
-  async getStatus(region: string = 'na'): Promise<any> {
-    const data = await this.request<{ data: any }>(`/v1/status/${region}`);
+  async getStatus(region: string = 'na'): Promise<Record<string, unknown>> {
+    const data = await this.request<{ data: Record<string, unknown> }>(`/v1/status/${region}`);
     return data.data;
   }
 
@@ -180,7 +180,7 @@ export class Valorant {
    * @param tag Player tag
    * @param mode Game mode (e.g., 'competitive')
    */
-  async getPlayerStats(region: string, name: string, tag: string, mode: string = 'competitive'): Promise<any> {
+  async getPlayerStats(region: string, name: string, tag: string, mode: string = 'competitive'): Promise<Record<string, unknown>> {
     try {
       // First get the account to verify it exists
       const account = await this.getAccount(name, tag);
@@ -206,7 +206,7 @@ export class Valorant {
    * @param matches Array of match data
    * @param playerName Player name to filter for
    */
-  private calculateStats(matches: any[], playerName: string): any {
+  private calculateStats(matches: Record<string, unknown>[], playerName: string): any {
     let kills = 0;
     let deaths = 0;
     let assists = 0;
@@ -288,3 +288,6 @@ export class Valorant {
     };
   }
 }
+
+
+

@@ -18,3 +18,4 @@ export default interface PayPalAuthOptions {
      */
     sandbox?: boolean;
   }
+

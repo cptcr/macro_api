@@ -43,7 +43,7 @@ export class DeepSeek {
         { headers: this.getHeaders() }
       );
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.response && error.response.data) {
         throw new Error(`DeepSeek API Error: ${JSON.stringify(error.response.data)}`);
       }
@@ -63,7 +63,7 @@ export class DeepSeek {
         { headers: this.getHeaders() }
       );
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.response && error.response.data) {
         throw new Error(`DeepSeek API Error: ${JSON.stringify(error.response.data)}`);
       }
@@ -83,7 +83,7 @@ export class DeepSeek {
         { headers: this.getHeaders() }
       );
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.response && error.response.data) {
         throw new Error(`DeepSeek API Error: ${JSON.stringify(error.response.data)}`);
       }
@@ -98,8 +98,8 @@ export class DeepSeek {
    */
   async createStreamingChatCompletion(
     options: ChatCompletionOptions,
-    onData: (data: any) => void,
-    onError?: (error: any) => void,
+    onData: (data: Record<string, unknown>) => void,
+    onError?: (error: unknown) => void,
     onEnd?: () => void
   ) {
     // Ensure stream option is set to true
@@ -134,7 +134,7 @@ export class DeepSeek {
                 const parsedData = JSON.parse(data);
                 onData(parsedData);
               } catch (e) {
-                console.warn('Error parsing DeepSeek stream data:', e);
+                console.warn('Error parsing DeepSeek stream data:', String(e));
               }
             }
           }
@@ -153,7 +153,7 @@ export class DeepSeek {
       
       // Return the stream so it can be canceled if needed
       return stream;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (onError) onError(error);
       throw error;
     }
@@ -191,7 +191,7 @@ export class DeepSeek {
         { headers: this.getHeaders() }
       );
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.response && error.response.data) {
         throw new Error(`DeepSeek API Error: ${JSON.stringify(error.response.data)}`);
       }
@@ -244,3 +244,5 @@ export class DeepSeek {
     return response.choices[0]?.message?.content || '';
   }
 }
+
+

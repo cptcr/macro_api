@@ -5,3 +5,4 @@ export default interface EmbeddingOptions {
     encoding_format?: 'float' | 'base64';
   }
   
+

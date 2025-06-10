@@ -29,8 +29,8 @@ export class NotionAPI {
   private async request<T>(
     method: 'get' | 'post' | 'patch' | 'delete',
     endpoint: string,
-    data?: any,
-    params?: any
+    data?: Record<string, unknown>,
+    params?: Record<string, unknown>
   ): Promise<T> {
     const response = await axios({
       method,
@@ -55,7 +55,7 @@ export class NotionAPI {
    * @param data Query parameters
    */
   async queryDatabase(databaseId: string, data?: {
-    filter?: Record<string, any>;
+    filter?: Record<string, unknown>;
     sorts?: Array<{
       property?: string;
       timestamp?: 'created_time' | 'last_edited_time';
@@ -64,7 +64,7 @@ export class NotionAPI {
     start_cursor?: string;
     page_size?: number;
   }) {
-    return this.request<any>('post', `/v1/databases/${databaseId}/query`, data || {});
+    return this.request<Record<string, unknown>>('post', `/v1/databases/${databaseId}/query`, data || {});
   }
 
   /**
@@ -72,7 +72,7 @@ export class NotionAPI {
    * @param databaseId Database ID
    */
   async getDatabase(databaseId: string) {
-    return this.request<any>('get', `/v1/databases/${databaseId}`);
+    return this.request<Record<string, unknown>>('get', `/v1/databases/${databaseId}`);
   }
 
   /**
@@ -90,11 +90,11 @@ export class NotionAPI {
         content: string;
         link?: { url: string };
       };
-      annotations?: Record<string, any>;
+      annotations?: Record<string, unknown>;
     }>;
     properties: Record<string, {
-      title?: {};
-      rich_text?: {};
+      title?: Record<string, never>;
+      rich_text?: Record<string, never>;
       number?: {
         format?: 'number' | 'number_with_commas' | 'percent' | 'dollar' | 'euro' | 'pound' | 'yen' | 'ruble' | 'rupee' | 'won' | 'yuan';
       };
@@ -110,13 +110,13 @@ export class NotionAPI {
           color?: string;
         }>;
       };
-      date?: {};
-      people?: {};
-      files?: {};
-      checkbox?: {};
-      url?: {};
-      email?: {};
-      phone_number?: {};
+      date?: Record<string, never>;
+      people?: Record<string, never>;
+      files?: Record<string, never>;
+      checkbox?: Record<string, never>;
+      url?: Record<string, never>;
+      email?: Record<string, never>;
+      phone_number?: Record<string, never>;
       formula?: {
         expression: string;
       };
@@ -131,10 +131,10 @@ export class NotionAPI {
         rollup_property_id: string;
         function: 'count' | 'count_values' | 'empty' | 'not_empty' | 'unique' | 'show_original' | 'show_unique' | 'sum' | 'average' | 'median' | 'min' | 'max' | 'range' | 'earliest_date' | 'latest_date' | 'date_range' | 'checked' | 'unchecked' | 'percent_checked' | 'percent_unchecked';
       };
-      created_time?: {};
-      created_by?: {};
-      last_edited_time?: {};
-      last_edited_by?: {};
+      created_time?: Record<string, never>;
+      created_by?: Record<string, never>;
+      last_edited_time?: Record<string, never>;
+      last_edited_by?: Record<string, never>;
     }>;
     icon?: {
       type: 'emoji' | 'external';
@@ -147,7 +147,7 @@ export class NotionAPI {
     };
     is_inline?: boolean;
   }) {
-    return this.request<any>('post', '/v1/databases', data);
+    return this.request<Record<string, unknown>>('post', '/v1/databases', data);
   }
 
   /**
@@ -162,9 +162,9 @@ export class NotionAPI {
         content: string;
         link?: { url: string };
       };
-      annotations?: Record<string, any>;
+      annotations?: Record<string, unknown>;
     }>;
-    properties?: Record<string, any>;
+    properties?: Record<string, unknown>;
     icon?: {
       type: 'emoji' | 'external';
       emoji?: string;
@@ -176,7 +176,7 @@ export class NotionAPI {
     } | null;
     is_inline?: boolean;
   }) {
-    return this.request<any>('patch', `/v1/databases/${databaseId}`, data);
+    return this.request<Record<string, unknown>>('patch', `/v1/databases/${databaseId}`, data);
   }
 
   // Page endpoints
@@ -191,8 +191,8 @@ export class NotionAPI {
       database_id?: string;
       page_id?: string;
     };
-    properties: Record<string, any>;
-    children?: Array<Record<string, any>>;
+    properties: Record<string, unknown>;
+    children?: Array<Record<string, unknown>>;
     icon?: {
       type: 'emoji' | 'external';
       emoji?: string;
@@ -203,7 +203,7 @@ export class NotionAPI {
       external: { url: string };
     };
   }) {
-    return this.request<any>('post', '/v1/pages', data);
+    return this.request<Record<string, unknown>>('post', '/v1/pages', data);
   }
 
   /**
@@ -211,7 +211,7 @@ export class NotionAPI {
    * @param pageId Page ID
    */
   async getPage(pageId: string) {
-    return this.request<any>('get', `/v1/pages/${pageId}`);
+    return this.request<Record<string, unknown>>('get', `/v1/pages/${pageId}`);
   }
 
   /**
@@ -220,7 +220,7 @@ export class NotionAPI {
    * @param data Update data
    */
   async updatePage(pageId: string, data: {
-    properties?: Record<string, any>;
+    properties?: Record<string, unknown>;
     icon?: {
       type: 'emoji' | 'external';
       emoji?: string;
@@ -232,7 +232,7 @@ export class NotionAPI {
     } | null;
     archived?: boolean;
   }) {
-    return this.request<any>('patch', `/v1/pages/${pageId}`, data);
+    return this.request<Record<string, unknown>>('patch', `/v1/pages/${pageId}`, data);
   }
 
   /**
@@ -241,7 +241,7 @@ export class NotionAPI {
    * @param propertyId Property ID
    */
   async getPageProperty(pageId: string, propertyId: string) {
-    return this.request<any>('get', `/v1/pages/${pageId}/properties/${propertyId}`);
+    return this.request<Record<string, unknown>>('get', `/v1/pages/${pageId}/properties/${propertyId}`);
   }
 
   // Block endpoints
@@ -252,7 +252,7 @@ export class NotionAPI {
    * @param params Pagination parameters
    */
   async getBlockChildren(blockId: string, params?: NotionPaginationParams) {
-    return this.request<any>('get', `/v1/blocks/${blockId}/children`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/v1/blocks/${blockId}/children`, undefined, params);
   }
 
   /**
@@ -261,9 +261,9 @@ export class NotionAPI {
    * @param data Block children data
    */
   async appendBlockChildren(blockId: string, data: {
-    children: Array<Record<string, any>>;
+    children: Array<Record<string, unknown>>;
   }) {
-    return this.request<any>('patch', `/v1/blocks/${blockId}/children`, data);
+    return this.request<Record<string, unknown>>('patch', `/v1/blocks/${blockId}/children`, data);
   }
 
   /**
@@ -271,7 +271,7 @@ export class NotionAPI {
    * @param blockId Block ID
    */
   async getBlock(blockId: string) {
-    return this.request<any>('get', `/v1/blocks/${blockId}`);
+    return this.request<Record<string, unknown>>('get', `/v1/blocks/${blockId}`);
   }
 
   /**
@@ -279,8 +279,8 @@ export class NotionAPI {
    * @param blockId Block ID
    * @param data Update data
    */
-  async updateBlock(blockId: string, data: Record<string, any>) {
-    return this.request<any>('patch', `/v1/blocks/${blockId}`, data);
+  async updateBlock(blockId: string, data: Record<string, unknown>) {
+    return this.request<Record<string, unknown>>('patch', `/v1/blocks/${blockId}`, data);
   }
 
   /**
@@ -288,7 +288,7 @@ export class NotionAPI {
    * @param blockId Block ID
    */
   async deleteBlock(blockId: string) {
-    return this.request<any>('delete', `/v1/blocks/${blockId}`);
+    return this.request<Record<string, unknown>>('delete', `/v1/blocks/${blockId}`);
   }
 
   // User endpoints
@@ -297,7 +297,7 @@ export class NotionAPI {
    * Get current user
    */
   async getCurrentUser() {
-    return this.request<any>('get', '/v1/users/me');
+    return this.request<Record<string, unknown>>('get', '/v1/users/me');
   }
 
   /**
@@ -305,7 +305,7 @@ export class NotionAPI {
    * @param userId User ID
    */
   async getUser(userId: string) {
-    return this.request<any>('get', `/v1/users/${userId}`);
+    return this.request<Record<string, unknown>>('get', `/v1/users/${userId}`);
   }
 
   /**
@@ -313,7 +313,7 @@ export class NotionAPI {
    * @param params Pagination parameters
    */
   async listUsers(params?: NotionPaginationParams) {
-    return this.request<any>('get', '/v1/users', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/v1/users', undefined, params);
   }
 
   // Search endpoint
@@ -335,7 +335,7 @@ export class NotionAPI {
     start_cursor?: string;
     page_size?: number;
   }) {
-    return this.request<any>('post', '/v1/search', data || {});
+    return this.request<Record<string, unknown>>('post', '/v1/search', data || {});
   }
 
   // Comment endpoints
@@ -368,7 +368,7 @@ export class NotionAPI {
       };
     }>;
   }) {
-    return this.request<any>('post', '/v1/comments', data);
+    return this.request<Record<string, unknown>>('post', '/v1/comments', data);
   }
 
   /**
@@ -381,7 +381,7 @@ export class NotionAPI {
     start_cursor?: string;
     page_size?: number;
   }) {
-    return this.request<any>('get', '/v1/comments', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/v1/comments', undefined, params);
   }
 
   // Block content helpers
@@ -543,7 +543,7 @@ export class NotionAPI {
   createDivider() {
     return {
       type: 'divider',
-      divider: {}
+      divider: Record<string, never>
     };
   }
 
@@ -576,7 +576,7 @@ export class NotionAPI {
    * @param caption Optional caption
    */
   createBookmark(url: string, caption?: string) {
-    const bookmark: any = {
+    const bookmark: Record<string, unknown> = {
       type: 'bookmark',
       bookmark: {
         url
@@ -601,7 +601,7 @@ export class NotionAPI {
    * @param caption Optional caption
    */
   createImage(url: string, caption?: string) {
-    const image: any = {
+    const image: Record<string, unknown> = {
       type: 'image',
       image: {
         type: 'external',
@@ -665,9 +665,10 @@ export class NotionAPI {
    * @param type Property type
    * @param options Property options
    */
-  createDatabaseProperty(type: string, options?: Record<string, any>) {
-    const property: Record<string, any> = {};
+  createDatabaseProperty(type: string, options?: Record<string, unknown>) {
+    const property: Record<string, unknown> = {};
     property[type] = options || {};
     return property;
   }
 }
+

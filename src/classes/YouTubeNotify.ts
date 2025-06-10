@@ -110,7 +110,7 @@ export class YouTubeNotify {
       return [];
     }
 
-    return response.data.items.map((item: any) => ({
+    return response.data.items.map((item: Record<string, unknown>) => ({
       videoId: item.id.videoId,
       title: item.snippet.title,
       channelId: item.snippet.channelId,
@@ -191,3 +191,4 @@ export class YouTubeNotify {
     }
   }
 }
+

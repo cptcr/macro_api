@@ -15,7 +15,7 @@ export interface CacheConfig {
   serialization?: 'json' | 'msgpack';
 }
 
-export interface CacheEntry<T = any> {
+export interface CacheEntry<T = unknown> {
   value: T;
   timestamp: number;
   ttl: number;
@@ -228,7 +228,7 @@ export class MemoryCacheProvider extends CacheProvider {
  * Note: Requires 'ioredis' package to be installed
  */
 export class RedisCacheProvider extends CacheProvider {
-  private client: any = null;
+  private client: Record<string, unknown> = null;
   private connected = false;
   private stats: CacheStats = {
     hits: 0,
@@ -681,3 +681,5 @@ export class CacheManager {
     await Promise.all(promises);
   }
 }
+
+

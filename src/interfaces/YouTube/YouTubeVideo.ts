@@ -7,3 +7,4 @@ export default interface YouTubeVideo {
     description: string;
     thumbnailUrl: string;
 }
+

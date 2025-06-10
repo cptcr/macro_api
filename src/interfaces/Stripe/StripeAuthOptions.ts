@@ -7,3 +7,4 @@ export default interface StripeAuthOptions {
      */
     secretKey: string;
   }
+

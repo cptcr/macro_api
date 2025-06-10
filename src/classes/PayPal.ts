@@ -62,8 +62,8 @@ export class PayPalAPI {
   private async request<T>(
     method: 'get' | 'post' | 'put' | 'patch' | 'delete',
     endpoint: string,
-    data?: any,
-    params?: any
+    data?: Record<string, unknown>,
+    params?: Record<string, unknown>
   ): Promise<T> {
     const token = await this.getAccessToken();
     
@@ -134,7 +134,7 @@ export class PayPalAPI {
       cancel_url?: string;
     };
   }) {
-    return this.request<any>('post', '/v2/checkout/orders', data);
+    return this.request<Record<string, unknown>>('post', '/v2/checkout/orders', data);
   }
 
   /**
@@ -142,7 +142,7 @@ export class PayPalAPI {
    * @param orderId Order ID
    */
   async getOrder(orderId: string) {
-    return this.request<any>('get', `/v2/checkout/orders/${orderId}`);
+    return this.request<Record<string, unknown>>('get', `/v2/checkout/orders/${orderId}`);
   }
 
   /**
@@ -155,7 +155,7 @@ export class PayPalAPI {
     path: string;
     value?: any;
   }>) {
-    return this.request<any>('patch', `/v2/checkout/orders/${orderId}`, data);
+    return this.request<Record<string, unknown>>('patch', `/v2/checkout/orders/${orderId}`, data);
   }
 
   /**
@@ -163,8 +163,8 @@ export class PayPalAPI {
    * @param orderId Order ID
    * @param data Optional data
    */
-  async authorizeOrder(orderId: string, data?: Record<string, any>) {
-    return this.request<any>('post', `/v2/checkout/orders/${orderId}/authorize`, data || {});
+  async authorizeOrder(orderId: string, data?: Record<string, unknown>) {
+    return this.request<Record<string, unknown>>('post', `/v2/checkout/orders/${orderId}/authorize`, data || {});
   }
 
   /**
@@ -172,8 +172,8 @@ export class PayPalAPI {
    * @param orderId Order ID
    * @param data Optional data
    */
-  async captureOrder(orderId: string, data?: Record<string, any>) {
-    return this.request<any>('post', `/v2/checkout/orders/${orderId}/capture`, data || {});
+  async captureOrder(orderId: string, data?: Record<string, unknown>) {
+    return this.request<Record<string, unknown>>('post', `/v2/checkout/orders/${orderId}/capture`, data || {});
   }
 
   // Payment endpoints
@@ -183,7 +183,7 @@ export class PayPalAPI {
    * @param paymentId Payment ID
    */
   async getPayment(paymentId: string) {
-    return this.request<any>('get', `/v2/payments/captures/${paymentId}`);
+    return this.request<Record<string, unknown>>('get', `/v2/payments/captures/${paymentId}`);
   }
 
   /**
@@ -199,7 +199,7 @@ export class PayPalAPI {
     invoice_id?: string;
     note_to_payer?: string;
   }) {
-    return this.request<any>('post', `/v2/payments/captures/${captureId}/refund`, data || {});
+    return this.request<Record<string, unknown>>('post', `/v2/payments/captures/${captureId}/refund`, data || {});
   }
 
   /**
@@ -207,7 +207,7 @@ export class PayPalAPI {
    * @param refundId Refund ID
    */
   async getRefund(refundId: string) {
-    return this.request<any>('get', `/v2/payments/refunds/${refundId}`);
+    return this.request<Record<string, unknown>>('get', `/v2/payments/refunds/${refundId}`);
   }
 
   /**
@@ -215,7 +215,7 @@ export class PayPalAPI {
    * @param authorizationId Authorization ID
    */
   async getAuthorization(authorizationId: string) {
-    return this.request<any>('get', `/v2/payments/authorizations/${authorizationId}`);
+    return this.request<Record<string, unknown>>('get', `/v2/payments/authorizations/${authorizationId}`);
   }
 
   /**
@@ -232,7 +232,7 @@ export class PayPalAPI {
     final_capture?: boolean;
     note_to_payer?: string;
   }) {
-    return this.request<any>('post', `/v2/payments/authorizations/${authorizationId}/capture`, data || {});
+    return this.request<Record<string, unknown>>('post', `/v2/payments/authorizations/${authorizationId}/capture`, data || {});
   }
 
   /**
@@ -240,7 +240,7 @@ export class PayPalAPI {
    * @param authorizationId Authorization ID
    */
   async voidAuthorization(authorizationId: string) {
-    return this.request<any>('post', `/v2/payments/authorizations/${authorizationId}/void`);
+    return this.request<Record<string, unknown>>('post', `/v2/payments/authorizations/${authorizationId}/void`);
   }
 
   // Invoicing endpoints
@@ -249,7 +249,7 @@ export class PayPalAPI {
    * Generate invoice number
    */
   async generateInvoiceNumber() {
-    return this.request<any>('post', '/v2/invoicing/generate-next-invoice-number');
+    return this.request<Record<string, unknown>>('post', '/v2/invoicing/generate-next-invoice-number');
   }
 
   /**
@@ -385,7 +385,7 @@ export class PayPalAPI {
       };
     };
   }) {
-    return this.request<any>('post', '/v2/invoicing/invoices', data);
+    return this.request<Record<string, unknown>>('post', '/v2/invoicing/invoices', data);
   }
 
   /**
@@ -393,7 +393,7 @@ export class PayPalAPI {
    * @param invoiceId Invoice ID
    */
   async getInvoice(invoiceId: string) {
-    return this.request<any>('get', `/v2/invoicing/invoices/${invoiceId}`);
+    return this.request<Record<string, unknown>>('get', `/v2/invoicing/invoices/${invoiceId}`);
   }
 
   /**
@@ -402,7 +402,7 @@ export class PayPalAPI {
    * @param data Invoice data (same as createInvoice)
    */
   async updateInvoice(invoiceId: string, data: any) {
-    return this.request<any>('put', `/v2/invoicing/invoices/${invoiceId}`, data);
+    return this.request<Record<string, unknown>>('put', `/v2/invoicing/invoices/${invoiceId}`, data);
   }
 
   /**
@@ -410,7 +410,7 @@ export class PayPalAPI {
    * @param invoiceId Invoice ID
    */
   async deleteInvoice(invoiceId: string) {
-    return this.request<any>('delete', `/v2/invoicing/invoices/${invoiceId}`);
+    return this.request<Record<string, unknown>>('delete', `/v2/invoicing/invoices/${invoiceId}`);
   }
 
   /**
@@ -422,7 +422,7 @@ export class PayPalAPI {
     send_to_recipient?: boolean;
     send_to_invoicer?: boolean;
   }) {
-    return this.request<any>('post', `/v2/invoicing/invoices/${invoiceId}/send`, data || {});
+    return this.request<Record<string, unknown>>('post', `/v2/invoicing/invoices/${invoiceId}/send`, data || {});
   }
 
   /**
@@ -461,7 +461,7 @@ export class PayPalAPI {
     page_size?: number;
     total_required?: boolean;
   }) {
-    return this.request<any>('post', '/v2/invoicing/search-invoices', data);
+    return this.request<Record<string, unknown>>('post', '/v2/invoicing/search-invoices', data);
   }
 
   // Subscriptions endpoints
@@ -504,7 +504,7 @@ export class PayPalAPI {
     };
     quantity_supported?: boolean;
   }) {
-    return this.request<any>('post', '/v1/billing/plans', data);
+    return this.request<Record<string, unknown>>('post', '/v1/billing/plans', data);
   }
 
   /**
@@ -512,7 +512,7 @@ export class PayPalAPI {
    * @param planId Plan ID
    */
   async getPlan(planId: string) {
-    return this.request<any>('get', `/v1/billing/plans/${planId}`);
+    return this.request<Record<string, unknown>>('get', `/v1/billing/plans/${planId}`);
   }
 
   /**
@@ -525,7 +525,7 @@ export class PayPalAPI {
     path: string;
     value: any;
   }>) {
-    return this.request<any>('patch', `/v1/billing/plans/${planId}`, data);
+    return this.request<Record<string, unknown>>('patch', `/v1/billing/plans/${planId}`, data);
   }
 
   /**
@@ -536,7 +536,7 @@ export class PayPalAPI {
     product_id?: string;
     plan_ids?: string;
   }) {
-    return this.request<any>('get', '/v1/billing/plans', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/v1/billing/plans', undefined, params);
   }
 
   /**
@@ -551,7 +551,7 @@ export class PayPalAPI {
     image_url?: string;
     home_url?: string;
   }) {
-    return this.request<any>('post', '/v1/catalogs/products', data);
+    return this.request<Record<string, unknown>>('post', '/v1/catalogs/products', data);
   }
 
   /**
@@ -559,7 +559,7 @@ export class PayPalAPI {
    * @param productId Product ID
    */
   async getProduct(productId: string) {
-    return this.request<any>('get', `/v1/catalogs/products/${productId}`);
+    return this.request<Record<string, unknown>>('get', `/v1/catalogs/products/${productId}`);
   }
 
   /**
@@ -567,7 +567,7 @@ export class PayPalAPI {
    * @param params Query parameters
    */
   async listProducts(params?: PayPalPaginationParams) {
-    return this.request<any>('get', '/v1/catalogs/products', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/v1/catalogs/products', undefined, params);
   }
 
   /**
@@ -631,7 +631,7 @@ export class PayPalAPI {
       cancel_url?: string;
     };
   }) {
-    return this.request<any>('post', '/v1/billing/subscriptions', data);
+    return this.request<Record<string, unknown>>('post', '/v1/billing/subscriptions', data);
   }
 
   /**
@@ -639,7 +639,7 @@ export class PayPalAPI {
    * @param subscriptionId Subscription ID
    */
   async getSubscription(subscriptionId: string) {
-    return this.request<any>('get', `/v1/billing/subscriptions/${subscriptionId}`);
+    return this.request<Record<string, unknown>>('get', `/v1/billing/subscriptions/${subscriptionId}`);
   }
 
   /**
@@ -652,7 +652,7 @@ export class PayPalAPI {
     path: string;
     value: any;
   }>) {
-    return this.request<any>('patch', `/v1/billing/subscriptions/${subscriptionId}`, data);
+    return this.request<Record<string, unknown>>('patch', `/v1/billing/subscriptions/${subscriptionId}`, data);
   }
 
   /**
@@ -661,7 +661,7 @@ export class PayPalAPI {
    * @param reason Reason for suspension
    */
   async suspendSubscription(subscriptionId: string, reason: string) {
-    return this.request<any>('post', `/v1/billing/subscriptions/${subscriptionId}/suspend`, { reason });
+    return this.request<Record<string, unknown>>('post', `/v1/billing/subscriptions/${subscriptionId}/suspend`, { reason });
   }
 
   /**
@@ -670,7 +670,7 @@ export class PayPalAPI {
    * @param reason Reason for activation
    */
   async activateSubscription(subscriptionId: string, reason: string) {
-    return this.request<any>('post', `/v1/billing/subscriptions/${subscriptionId}/activate`, { reason });
+    return this.request<Record<string, unknown>>('post', `/v1/billing/subscriptions/${subscriptionId}/activate`, { reason });
   }
 
   /**
@@ -679,7 +679,7 @@ export class PayPalAPI {
    * @param reason Reason for cancellation
    */
   async cancelSubscription(subscriptionId: string, reason: string) {
-    return this.request<any>('post', `/v1/billing/subscriptions/${subscriptionId}/cancel`, { reason });
+    return this.request<Record<string, unknown>>('post', `/v1/billing/subscriptions/${subscriptionId}/cancel`, { reason });
   }
 
   // Disputes endpoints
@@ -697,7 +697,7 @@ export class PayPalAPI {
     page_size?: number;
     next_page_token?: string;
   }) {
-    return this.request<any>('get', '/v1/customer/disputes', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/v1/customer/disputes', undefined, params);
   }
 
   /**
@@ -705,7 +705,7 @@ export class PayPalAPI {
    * @param disputeId Dispute ID
    */
   async getDispute(disputeId: string) {
-    return this.request<any>('get', `/v1/customer/disputes/${disputeId}`);
+    return this.request<Record<string, unknown>>('get', `/v1/customer/disputes/${disputeId}`);
   }
 
   // Payouts endpoints
@@ -732,7 +732,7 @@ export class PayPalAPI {
       sender_item_id?: string;
     }>;
   }) {
-    return this.request<any>('post', '/v1/payments/payouts', data);
+    return this.request<Record<string, unknown>>('post', '/v1/payments/payouts', data);
   }
 
   /**
@@ -740,7 +740,7 @@ export class PayPalAPI {
    * @param payoutBatchId Payout batch ID
    */
   async getPayout(payoutBatchId: string) {
-    return this.request<any>('get', `/v1/payments/payouts/${payoutBatchId}`);
+    return this.request<Record<string, unknown>>('get', `/v1/payments/payouts/${payoutBatchId}`);
   }
 
   /**
@@ -748,7 +748,7 @@ export class PayPalAPI {
    * @param payoutItemId Payout item ID
    */
   async getPayoutItem(payoutItemId: string) {
-    return this.request<any>('get', `/v1/payments/payouts-item/${payoutItemId}`);
+    return this.request<Record<string, unknown>>('get', `/v1/payments/payouts-item/${payoutItemId}`);
   }
 
   /**
@@ -756,7 +756,7 @@ export class PayPalAPI {
    * @param payoutItemId Payout item ID
    */
   async cancelPayoutItem(payoutItemId: string) {
-    return this.request<any>('post', `/v1/payments/payouts-item/${payoutItemId}/cancel`);
+    return this.request<Record<string, unknown>>('post', `/v1/payments/payouts-item/${payoutItemId}/cancel`);
   }
 
   // Webhooks endpoints
@@ -771,7 +771,7 @@ export class PayPalAPI {
       name: string;
     }>;
   }) {
-    return this.request<any>('post', '/v1/notifications/webhooks', data);
+    return this.request<Record<string, unknown>>('post', '/v1/notifications/webhooks', data);
   }
 
   /**
@@ -779,14 +779,14 @@ export class PayPalAPI {
    * @param webhookId Webhook ID
    */
   async getWebhook(webhookId: string) {
-    return this.request<any>('get', `/v1/notifications/webhooks/${webhookId}`);
+    return this.request<Record<string, unknown>>('get', `/v1/notifications/webhooks/${webhookId}`);
   }
 
   /**
    * List webhooks
    */
   async listWebhooks() {
-    return this.request<any>('get', '/v1/notifications/webhooks');
+    return this.request<Record<string, unknown>>('get', '/v1/notifications/webhooks');
   }
 
   /**
@@ -799,7 +799,7 @@ export class PayPalAPI {
     path: string;
     value?: any;
   }>) {
-    return this.request<any>('patch', `/v1/notifications/webhooks/${webhookId}`, data);
+    return this.request<Record<string, unknown>>('patch', `/v1/notifications/webhooks/${webhookId}`, data);
   }
 
   /**
@@ -807,14 +807,14 @@ export class PayPalAPI {
    * @param webhookId Webhook ID
    */
   async deleteWebhook(webhookId: string) {
-    return this.request<any>('delete', `/v1/notifications/webhooks/${webhookId}`);
+    return this.request<Record<string, unknown>>('delete', `/v1/notifications/webhooks/${webhookId}`);
   }
 
   /**
    * List event types for webhooks
    */
   async listEventTypes() {
-    return this.request<any>('get', '/v1/notifications/webhooks-event-types');
+    return this.request<Record<string, unknown>>('get', '/v1/notifications/webhooks-event-types');
   }
 
   /**
@@ -828,8 +828,11 @@ export class PayPalAPI {
     transmission_sig: string;
     transmission_time: string;
     webhook_id: string;
-    webhook_event: Record<string, any>;
+    webhook_event: Record<string, unknown>;
   }) {
-    return this.request<any>('post', '/v1/notifications/verify-webhook-signature', data);
+    return this.request<Record<string, unknown>>('post', '/v1/notifications/verify-webhook-signature', data);
   }
 }
+
+
+

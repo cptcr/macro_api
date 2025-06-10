@@ -3,3 +3,4 @@ export default interface EmbeddingOptions {
     input: string | string[];
   }
   
+

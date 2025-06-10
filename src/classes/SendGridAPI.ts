@@ -14,7 +14,7 @@ export interface EmailOptions {
   text?: string;
   html?: string;
   templateId?: string;
-  dynamicTemplateData?: Record<string, any>;
+  dynamicTemplateData?: Record<string, unknown>;
   attachments?: Attachment[];
   customArgs?: Record<string, string>;
   headers?: Record<string, string>;
@@ -93,7 +93,7 @@ export interface Contact {
   line?: string;
   facebook?: string;
   uniqueName?: string;
-  customFields?: Record<string, any>;
+  customFields?: Record<string, unknown>;
 }
 
 export interface List {
@@ -191,7 +191,7 @@ export class SendGridAPI {
   private async request<T>(
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
     endpoint: string,
-    data?: any,
+    data?: Record<string, unknown>,
     customHeaders?: Record<string, string>
   ): Promise<T> {
     try {
@@ -210,16 +210,16 @@ export class SendGridAPI {
       });
 
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.handleSendGridError(error);
       throw error;
     }
   }
 
-  private handleSendGridError(error: any): void {
+  private handleSendGridError(error: unknown): void {
     if (error.response?.data?.errors) {
-      const errors = error.response.data.errors;
-      const errorMessages = errors.map((err: any) => err.message).join(', ');
+      const errors = (error.response.data as { errors: Array<{ message: string }> }).errors;
+      const errorMessages = errors.map((err: { message: string }) => err.message).join(', ');
       throw new Error(`SendGrid API Error: ${errorMessages}`);
     }
   }
@@ -249,7 +249,7 @@ export class SendGridAPI {
       throw new Error('Email content (text, html, or templateId) is required');
     }
 
-    const emailData: any = {
+    const emailData: Record<string, unknown> = {
       personalizations: [{
         to: this.formatEmailAddresses(options.to)
       }],
@@ -319,7 +319,7 @@ export class SendGridAPI {
       emailData.mailSettings = options.mailSettings;
     }
 
-    const response = await this.request<any>('POST', '/mail/send', emailData);
+    const response = await this.request<Record<string, unknown>>('POST', '/mail/send', emailData);
     
     // SendGrid returns a 202 status with no body for successful sends
     // We need to extract the message ID from the response headers
@@ -334,7 +334,7 @@ export class SendGridAPI {
   async sendTemplateEmail(
     templateId: string, 
     recipients: Recipient[], 
-    globalTemplateData?: Record<string, any>
+    globalTemplateData?: Record<string, unknown>
   ): Promise<EmailResponse> {
     if (!templateId) {
       throw new Error('Template ID is required');
@@ -343,14 +343,14 @@ export class SendGridAPI {
       throw new Error('At least one recipient is required');
     }
 
-    const emailData: any = {
+    const emailData: Record<string, unknown> = {
       from: this.formatEmailAddress(
         this.defaultFromEmail || 'noreply@example.com',
         this.defaultFromName
       ),
       templateId,
       personalizations: recipients.map(recipient => {
-        const personalization: any = {
+        const personalization: Record<string, unknown> = {
           to: [this.formatEmailAddress(recipient.email, recipient.name)]
         };
 
@@ -369,7 +369,7 @@ export class SendGridAPI {
       })
     };
 
-    await this.request<any>('POST', '/mail/send', emailData);
+    await this.request<Record<string, unknown>>('POST', '/mail/send', emailData);
     
     return {
       messageId: 'batch_sent'
@@ -435,7 +435,7 @@ export class SendGridAPI {
   /**
    * Add contacts to a list
    */
-  async addToList(listId: string, contacts: Contact[]): Promise<any> {
+  async addToList(listId: string, contacts: Contact[]): Promise<Record<string, unknown>> {
     if (!contacts || contacts.length === 0) {
       throw new Error('At least one contact is required');
     }
@@ -443,7 +443,7 @@ export class SendGridAPI {
     const contactData = {
       listIds: [listId],
       contacts: contacts.map(contact => {
-        const formattedContact: any = {
+        const formattedContact: Record<string, unknown> = {
           email: contact.email
         };
 
@@ -465,7 +465,7 @@ export class SendGridAPI {
       })
     };
 
-    return this.request<any>('PUT', '/marketing/contacts', contactData);
+    return this.request<Record<string, unknown>>('PUT', '/marketing/contacts', contactData);
   }
 
   /**
@@ -493,7 +493,7 @@ export class SendGridAPI {
    * Get email statistics for date range
    */
   async getEmailStats(startDate: string, endDate?: string, aggregatedBy?: 'day' | 'week' | 'month'): Promise<EmailStats[]> {
-    const params: any = {
+    const params: Record<string, unknown> = {
       startDate,
       aggregatedBy: aggregatedBy || 'day'
     };
@@ -620,3 +620,6 @@ export class SendGridAPI {
     }
   }
 }
+
+
+

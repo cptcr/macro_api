@@ -7,3 +7,4 @@ export default interface FootballAuthOptions {
      */
     apiKey: string;
   }
+

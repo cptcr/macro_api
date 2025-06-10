@@ -129,7 +129,6 @@ export interface Project {
     autoExposeSystemEnvs: boolean;
     gitForkProtection: boolean;
     priorityHint?: number;
-    devCommand?: string;
     latestDeployments: Deployment[];
     targets: Record<string, any>;
     lastRollbackTarget?: any;
@@ -138,7 +137,6 @@ export interface Project {
     passwordProtection?: any;
     ssoProtection?: any;
     gitLFS: boolean;
-    webAnalytics?: any;
     crons?: {
         enabledAt: number;
         disabledAt?: number;

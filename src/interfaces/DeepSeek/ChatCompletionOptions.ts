@@ -9,3 +9,4 @@ export default interface ChatCompletionOptions {
     stream?: boolean;
     stop?: string[];
 }
+

@@ -154,8 +154,8 @@ export class SpotifyAPI {
   private async request<T>(
     method: 'get' | 'post' | 'put' | 'delete',
     endpoint: string,
-    data?: any,
-    params?: any
+    data?: Record<string, unknown>,
+    params?: Record<string, unknown>
   ): Promise<T> {
     const token = await this.ensureAccessToken();
     
@@ -178,7 +178,7 @@ export class SpotifyAPI {
    * Get the current user's profile
    */
   async getCurrentUser() {
-    return this.request<any>('get', '/me');
+    return this.request<Record<string, unknown>>('get', '/me');
   }
 
   /**
@@ -186,7 +186,7 @@ export class SpotifyAPI {
    * @param userId Spotify user ID
    */
   async getUser(userId: string) {
-    return this.request<any>('get', `/users/${userId}`);
+    return this.request<Record<string, unknown>>('get', `/users/${userId}`);
   }
 
   // Track endpoints
@@ -196,7 +196,7 @@ export class SpotifyAPI {
    * @param trackId Spotify track ID
    */
   async getTrack(trackId: string) {
-    return this.request<any>('get', `/tracks/${trackId}`);
+    return this.request<Record<string, unknown>>('get', `/tracks/${trackId}`);
   }
 
   /**
@@ -204,7 +204,7 @@ export class SpotifyAPI {
    * @param trackIds Array of Spotify track IDs
    */
   async getTracks(trackIds: string[]) {
-    return this.request<any>('get', '/tracks', undefined, {
+    return this.request<Record<string, unknown>>('get', '/tracks', undefined, {
       ids: trackIds.join(',')
     });
   }
@@ -216,7 +216,7 @@ export class SpotifyAPI {
    * @param albumId Spotify album ID
    */
   async getAlbum(albumId: string) {
-    return this.request<any>('get', `/albums/${albumId}`);
+    return this.request<Record<string, unknown>>('get', `/albums/${albumId}`);
   }
 
   /**
@@ -225,7 +225,7 @@ export class SpotifyAPI {
    * @param params Pagination parameters
    */
   async getAlbumTracks(albumId: string, params?: SpotifyPaginationParams) {
-    return this.request<any>('get', `/albums/${albumId}/tracks`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/albums/${albumId}/tracks`, undefined, params);
   }
 
   // Artist endpoints
@@ -235,7 +235,7 @@ export class SpotifyAPI {
    * @param artistId Spotify artist ID
    */
   async getArtist(artistId: string) {
-    return this.request<any>('get', `/artists/${artistId}`);
+    return this.request<Record<string, unknown>>('get', `/artists/${artistId}`);
   }
 
   /**
@@ -247,7 +247,7 @@ export class SpotifyAPI {
     include_groups?: string;
     market?: string;
   }) {
-    return this.request<any>('get', `/artists/${artistId}/albums`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/artists/${artistId}/albums`, undefined, params);
   }
 
   /**
@@ -256,7 +256,7 @@ export class SpotifyAPI {
    * @param market Market code
    */
   async getArtistTopTracks(artistId: string, market: string = 'US') {
-    return this.request<any>('get', `/artists/${artistId}/top-tracks`, undefined, { market });
+    return this.request<Record<string, unknown>>('get', `/artists/${artistId}/top-tracks`, undefined, { market });
   }
 
   // Playlist endpoints
@@ -266,7 +266,7 @@ export class SpotifyAPI {
    * @param playlistId Spotify playlist ID
    */
   async getPlaylist(playlistId: string) {
-    return this.request<any>('get', `/playlists/${playlistId}`);
+    return this.request<Record<string, unknown>>('get', `/playlists/${playlistId}`);
   }
 
   /**
@@ -275,7 +275,7 @@ export class SpotifyAPI {
    * @param params Pagination parameters
    */
   async getPlaylistTracks(playlistId: string, params?: SpotifyPaginationParams) {
-    return this.request<any>('get', `/playlists/${playlistId}/tracks`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/playlists/${playlistId}/tracks`, undefined, params);
   }
 
   /**
@@ -286,7 +286,7 @@ export class SpotifyAPI {
    * @param description Playlist description
    */
   async createPlaylist(userId: string, name: string, isPublic: boolean = true, description?: string) {
-    return this.request<any>('post', `/users/${userId}/playlists`, {
+    return this.request<Record<string, unknown>>('post', `/users/${userId}/playlists`, {
       name,
       public: isPublic,
       description
@@ -300,7 +300,7 @@ export class SpotifyAPI {
    * @param position Position to insert tracks
    */
   async addTracksToPlaylist(playlistId: string, trackUris: string[], position?: number) {
-    return this.request<any>('post', `/playlists/${playlistId}/tracks`, {
+    return this.request<Record<string, unknown>>('post', `/playlists/${playlistId}/tracks`, {
       uris: trackUris,
       position
     });
@@ -312,14 +312,14 @@ export class SpotifyAPI {
    * Get the user's currently played track
    */
   async getCurrentlyPlaying() {
-    return this.request<any>('get', '/me/player/currently-playing');
+    return this.request<Record<string, unknown>>('get', '/me/player/currently-playing');
   }
 
   /**
    * Get the user's playback state
    */
   async getPlaybackState() {
-    return this.request<any>('get', '/me/player');
+    return this.request<Record<string, unknown>>('get', '/me/player');
   }
 
   /**
@@ -329,7 +329,7 @@ export class SpotifyAPI {
    */
   async controlPlayback(action: 'play' | 'pause' | 'next' | 'previous', deviceId?: string) {
     const params = deviceId ? { device_id: deviceId } : undefined;
-    return this.request<any>('put', `/me/player/${action}`, undefined, params);
+    return this.request<Record<string, unknown>>('put', `/me/player/${action}`, undefined, params);
   }
 
   // Search endpoint
@@ -345,7 +345,7 @@ export class SpotifyAPI {
     types: Array<'album' | 'artist' | 'playlist' | 'track'>,
     params?: SpotifyPaginationParams & { market?: string }
   ) {
-    return this.request<any>('get', '/search', undefined, {
+    return this.request<Record<string, unknown>>('get', '/search', undefined, {
       q: query,
       type: types.join(','),
       ...params
@@ -366,11 +366,13 @@ export class SpotifyAPI {
     [key: string]: any;
   }) {
     // Convert arrays to comma-separated strings
-    const queryParams: any = { ...params };
+    const queryParams: Record<string, unknown> = { ...params };
     if (params.seed_artists) queryParams.seed_artists = params.seed_artists.join(',');
     if (params.seed_tracks) queryParams.seed_tracks = params.seed_tracks.join(',');
     if (params.seed_genres) queryParams.seed_genres = params.seed_genres.join(',');
     
-    return this.request<any>('get', '/recommendations', undefined, queryParams);
+    return this.request<Record<string, unknown>>('get', '/recommendations', undefined, queryParams);
   }
 }
+
+

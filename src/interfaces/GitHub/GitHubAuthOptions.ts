@@ -7,3 +7,4 @@ export default interface GitHubAuthOptions {
    */
   token: string;
 }
+

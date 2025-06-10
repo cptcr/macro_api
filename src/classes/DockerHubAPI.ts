@@ -216,7 +216,7 @@ export class DockerHubAPI {
   private async request<T>(
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
     endpoint: string,
-    data?: any,
+    data?: Record<string, unknown>,
     customHeaders?: Record<string, string>
   ): Promise<T> {
     try {
@@ -235,13 +235,13 @@ export class DockerHubAPI {
       });
 
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.handleDockerHubError(error);
       throw error;
     }
   }
 
-  private handleDockerHubError(error: any): void {
+  private handleDockerHubError(error: unknown): void {
     if (error.response?.data?.detail) {
       throw new Error(`Docker Hub API Error: ${error.response.data.detail}`);
     } else if (error.response?.data?.message) {
@@ -290,7 +290,7 @@ export class DockerHubAPI {
   }): Promise<Repository> {
     const [namespace, repo] = this.parseRepositoryName(name);
     
-    const data: any = {
+    const data: Record<string, unknown> = {
       name: repo,
       namespace,
       description: options?.description || '',
@@ -311,7 +311,7 @@ export class DockerHubAPI {
   }): Promise<Repository> {
     const [namespace, repo] = this.parseRepositoryName(name);
     
-    const data: any = {};
+    const data: Record<string, unknown> = {};
     if (updates.description !== undefined) data.description = updates.description;
     if (updates.fullDescription !== undefined) data.full_description = updates.fullDescription;
     if (updates.isPrivate !== undefined) data.is_private = updates.isPrivate;
@@ -331,7 +331,6 @@ export class DockerHubAPI {
    * List tags for a repository
    */
   async listTags(repository: string, options?: TagOptions): Promise<{ count: number; next?: string; previous?: string; results: Tag[] }> {
-    const [namespace, repo] = this.parseRepositoryName(repository);
     const params = new URLSearchParams();
     
     if (options?.page) params.set('page', options.page.toString());
@@ -350,7 +349,6 @@ export class DockerHubAPI {
    * Get detailed information about a specific tag
    */
   async getTagDetails(repository: string, tag: string): Promise<TagDetails> {
-    const [namespace, repo] = this.parseRepositoryName(repository);
     return this.request<TagDetails>('GET', `/repositories/${namespace}/${repo}/tags/${tag}/`);
   }
 
@@ -358,12 +356,10 @@ export class DockerHubAPI {
    * Delete a tag
    */
   async deleteTag(repository: string, tag: string): Promise<DeleteResult> {
-    const [namespace, repo] = this.parseRepositoryName(repository);
-    
     try {
       await this.request<void>('DELETE', `/repositories/${namespace}/${repo}/tags/${tag}/`);
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { 
         success: false, 
         message: error.message || 'Failed to delete tag'
@@ -399,9 +395,7 @@ export class DockerHubAPI {
   /**
    * Get download statistics for a repository
    */
-  async getDownloadStats(repository: string, timeframe?: 'day' | 'week' | 'month'): Promise<DownloadStats> {
-    const [namespace, repo] = this.parseRepositoryName(repository);
-    
+  async getDownloadStats(repository: string, _timeframe?: 'day' | 'week' | 'month'): Promise<DownloadStats> {
     // Docker Hub doesn't provide detailed stats via public API
     // This is a simplified implementation that gets basic pull count
     const repoInfo = await this.getRepository(repository);
@@ -434,7 +428,6 @@ export class DockerHubAPI {
    * Star a repository
    */
   async starRepository(repository: string): Promise<void> {
-    const [namespace, repo] = this.parseRepositoryName(repository);
     await this.request<void>('POST', `/repositories/${namespace}/${repo}/stars/`);
   }
 
@@ -442,7 +435,6 @@ export class DockerHubAPI {
    * Unstar a repository
    */
   async unstarRepository(repository: string): Promise<void> {
-    const [namespace, repo] = this.parseRepositoryName(repository);
     await this.request<void>('DELETE', `/repositories/${namespace}/${repo}/stars/`);
   }
 
@@ -450,7 +442,6 @@ export class DockerHubAPI {
    * Get repository build triggers (for automated builds)
    */
   async getBuildTriggers(repository: string): Promise<BuildTrigger[]> {
-    const [namespace, repo] = this.parseRepositoryName(repository);
     const response = await this.request<{ results: BuildTrigger[] }>('GET', `/repositories/${namespace}/${repo}/autobuild/`);
     return response.results;
   }
@@ -458,7 +449,7 @@ export class DockerHubAPI {
   /**
    * Create a build trigger
    */
-  async createBuildTrigger(repository: string, trigger: {
+  async createBuildTrigger(_repository: string, trigger: {
     name: string;
     sourceType: 'Branch' | 'Tag';
     sourceName: string;
@@ -467,8 +458,6 @@ export class DockerHubAPI {
     tag: string;
     buildArgs?: Record<string, string>;
   }): Promise<BuildTrigger> {
-    const [namespace, repo] = this.parseRepositoryName(repository);
-    
     const data = {
       name: trigger.name,
       source_type: trigger.sourceType,
@@ -488,21 +477,18 @@ export class DockerHubAPI {
   /**
    * Delete a build trigger
    */
-  async deleteBuildTrigger(repository: string, triggerId: string): Promise<void> {
-    const [namespace, repo] = this.parseRepositoryName(repository);
+  async deleteBuildTrigger(_repository: string, triggerId: string): Promise<void> {
     await this.request<void>('DELETE', `/repositories/${namespace}/${repo}/autobuild/${triggerId}/`);
   }
 
   /**
    * Trigger a build
    */
-  async triggerBuild(repository: string, options?: {
+  async triggerBuild(_repository: string, options?: {
     sourceType?: 'Branch' | 'Tag';
     sourceName?: string;
   }): Promise<{ build_tag: string; request_id: string }> {
-    const [namespace, repo] = this.parseRepositoryName(repository);
-    
-    const data: any = {};
+    const data: Record<string, unknown> = {};
     if (options?.sourceType) data.source_type = options.sourceType;
     if (options?.sourceName) data.source_name = options.sourceName;
 
@@ -512,8 +498,7 @@ export class DockerHubAPI {
   /**
    * Get repository webhooks
    */
-  async getWebhooks(repository: string): Promise<WebhookConfig[]> {
-    const [namespace, repo] = this.parseRepositoryName(repository);
+  async getWebhooks(_repository: string): Promise<WebhookConfig[]> {
     const response = await this.request<{ results: WebhookConfig[] }>('GET', `/repositories/${namespace}/${repo}/webhooks/`);
     return response.results;
   }
@@ -526,8 +511,6 @@ export class DockerHubAPI {
     webhookUrl: string;
     expectFinalCallback?: boolean;
   }): Promise<WebhookConfig> {
-    const [namespace, repo] = this.parseRepositoryName(repository);
-    
     const data = {
       name: webhook.name,
       webhook_url: webhook.webhookUrl,
@@ -546,9 +529,7 @@ export class DockerHubAPI {
     active?: boolean;
     expectFinalCallback?: boolean;
   }): Promise<WebhookConfig> {
-    const [namespace, repo] = this.parseRepositoryName(repository);
-    
-    const data: any = {};
+    const data: Record<string, unknown> = {};
     if (updates.name !== undefined) data.name = updates.name;
     if (updates.webhookUrl !== undefined) data.webhook_url = updates.webhookUrl;
     if (updates.active !== undefined) data.active = updates.active;
@@ -561,22 +542,21 @@ export class DockerHubAPI {
    * Delete a webhook
    */
   async deleteWebhook(repository: string, webhookId: string): Promise<void> {
-    const [namespace, repo] = this.parseRepositoryName(repository);
     await this.request<void>('DELETE', `/repositories/${namespace}/${repo}/webhooks/${webhookId}/`);
   }
 
   /**
    * Get current user information
    */
-  async getCurrentUser(): Promise<any> {
-    return this.request<any>('GET', '/user/');
+  async getCurrentUser(): Promise<Record<string, unknown>> {
+    return this.request<Record<string, unknown>>('GET', '/user/');
   }
 
   /**
    * Get user's organizations
    */
   async getUserOrganizations(): Promise<any[]> {
-    const response = await this.request<{ results: any[] }>('GET', '/user/orgs/');
+    const response = await this.request<{ results: Record<string, unknown>[] }>('GET', '/user/orgs/');
     return response.results;
   }
 
@@ -622,7 +602,7 @@ export class DockerHubAPI {
   /**
    * Get repository vulnerability scan results (if available)
    */
-  async getVulnerabilityReport(repository: string, tag: string): Promise<any> {
+  async getVulnerabilityReport(repository: string, tag: string): Promise<Record<string, unknown>> {
     try {
       const tagDetails = await this.getTagDetails(repository, tag);
       return tagDetails.vulnerabilities || null;
@@ -634,11 +614,9 @@ export class DockerHubAPI {
   /**
    * Get repository manifest
    */
-  async getManifest(repository: string, tag: string): Promise<any> {
-    const [namespace, repo] = this.parseRepositoryName(repository);
-    
+  async getManifest(repository: string, tag: string): Promise<Record<string, unknown>> {
     try {
-      return this.request<any>('GET', `/repositories/${namespace}/${repo}/tags/${tag}/images/`);
+      return this.request<Record<string, unknown>>('GET', `/repositories/${namespace}/${repo}/tags/${tag}/images/`);
     } catch (error) {
       throw new Error(`Failed to get manifest for ${repository}:${tag}`);
     }
@@ -651,7 +629,7 @@ export class DockerHubAPI {
     try {
       await this.getRepository(name);
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.message?.includes('404')) {
         return false;
       }
@@ -666,7 +644,7 @@ export class DockerHubAPI {
     try {
       await this.getTagDetails(repository, tag);
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.message?.includes('404')) {
         return false;
       }
@@ -674,3 +652,6 @@ export class DockerHubAPI {
     }
   }
 }
+
+
+

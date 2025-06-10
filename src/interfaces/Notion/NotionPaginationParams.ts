@@ -13,3 +13,4 @@ export default interface NotionPaginationParams {
      */
     start_cursor?: string;
   }
+

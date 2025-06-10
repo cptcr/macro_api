@@ -242,7 +242,7 @@ export class S3API {
       });
 
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.handleS3Error(error);
       throw error;
     }
@@ -311,7 +311,7 @@ export class S3API {
     return kSigning;
   }
 
-  private handleS3Error(error: any): void {
+  private handleS3Error(error: unknown): void {
     if (error.response?.data) {
       // Try to parse XML error response
       const errorData = error.response.data;
@@ -462,10 +462,10 @@ export class S3API {
     }
   ): Promise<string> {
     const now = new Date();
-    const expires = new Date(now.getTime() + expiresIn * 1000);
+    // expires variable removed
     const timestamp = now.toISOString().replace(/[:\-]|\.\d{3}/g, '');
     const dateStamp = timestamp.slice(0, 8);
-    const expiresTimestamp = Math.floor(expires.getTime() / 1000);
+
 
     const url = new URL(`${this.baseUrl}/${encodeURIComponent(key).replace(/%2F/g, '/')}`);
     
@@ -598,7 +598,7 @@ export class S3API {
     try {
       await this.request('HEAD', key);
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.response?.status === 404) {
         return false;
       }
@@ -762,3 +762,6 @@ export class S3API {
     }
   }
 }
+
+
+

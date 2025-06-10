@@ -7,3 +7,4 @@ export default interface CompletionOptions {
     stream?: boolean;
     stop?: string[];
 }
+

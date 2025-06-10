@@ -1,6 +1,5 @@
 import axios from 'axios';
 import FootballAuthOptions from '../interfaces/FootballAPI/FootballAuthOptions';
-import FootballPaginationParams from '../interfaces/FootballAPI/FootballPaginationParams';
 
 /**
  * Complete Football API wrapper for interacting with all API-Football endpoints
@@ -26,7 +25,7 @@ export class FootballAPI {
   private async request<T>(
     method: 'get' | 'post' | 'put' | 'delete',
     endpoint: string,
-    params?: any
+    params?: Record<string, unknown>
   ): Promise<T> {
     const response = await axios({
       method,
@@ -47,7 +46,7 @@ export class FootballAPI {
    * Get API status
    */
   async getStatus() {
-    return this.request<any>('get', '/status');
+    return this.request<Record<string, unknown>>('get', '/status');
   }
 
   // Countries endpoints
@@ -57,7 +56,7 @@ export class FootballAPI {
    * @param name Optional country name filter
    */
   async getCountries(name?: string) {
-    return this.request<any>('get', '/countries', { name });
+    return this.request<Record<string, unknown>>('get', '/countries', { name });
   }
 
   // Leagues endpoints
@@ -75,14 +74,14 @@ export class FootballAPI {
     current?: boolean;
     search?: string;
   }) {
-    return this.request<any>('get', '/leagues', params);
+    return this.request<Record<string, unknown>>('get', '/leagues', params);
   }
 
   /**
    * Get seasons
    */
   async getSeasons() {
-    return this.request<any>('get', '/leagues/seasons');
+    return this.request<Record<string, unknown>>('get', '/leagues/seasons');
   }
 
   // Teams endpoints
@@ -99,7 +98,7 @@ export class FootballAPI {
     country?: string;
     search?: string;
   }) {
-    return this.request<any>('get', '/teams', params);
+    return this.request<Record<string, unknown>>('get', '/teams', params);
   }
 
   /**
@@ -111,7 +110,7 @@ export class FootballAPI {
     team: number;
     season: number;
   }) {
-    return this.request<any>('get', '/teams/statistics', params);
+    return this.request<Record<string, unknown>>('get', '/teams/statistics', params);
   }
 
   /**
@@ -119,14 +118,14 @@ export class FootballAPI {
    * @param teamId Team ID
    */
   async getTeamSeasons(teamId: number) {
-    return this.request<any>('get', '/teams/seasons', { team: teamId });
+    return this.request<Record<string, unknown>>('get', '/teams/seasons', { team: teamId });
   }
 
   /**
    * Get team countries
    */
   async getTeamCountries() {
-    return this.request<any>('get', '/teams/countries');
+    return this.request<Record<string, unknown>>('get', '/teams/countries');
   }
 
   // Players endpoints
@@ -143,14 +142,14 @@ export class FootballAPI {
     search?: string;
     page?: number;
   }) {
-    return this.request<any>('get', '/players', params);
+    return this.request<Record<string, unknown>>('get', '/players', params);
   }
 
   /**
    * Get player seasons
    */
   async getPlayerSeasons() {
-    return this.request<any>('get', '/players/seasons');
+    return this.request<Record<string, unknown>>('get', '/players/seasons');
   }
 
   /**
@@ -161,7 +160,7 @@ export class FootballAPI {
     league: number;
     season: number;
   }) {
-    return this.request<any>('get', '/players/topscorers', params);
+    return this.request<Record<string, unknown>>('get', '/players/topscorers', params);
   }
 
   /**
@@ -172,7 +171,7 @@ export class FootballAPI {
     league: number;
     season: number;
   }) {
-    return this.request<any>('get', '/players/topassists', params);
+    return this.request<Record<string, unknown>>('get', '/players/topassists', params);
   }
 
   /**
@@ -183,7 +182,7 @@ export class FootballAPI {
     league: number;
     season: number;
   }) {
-    return this.request<any>('get', '/players/topyellowcards', params);
+    return this.request<Record<string, unknown>>('get', '/players/topyellowcards', params);
   }
 
   /**
@@ -194,7 +193,7 @@ export class FootballAPI {
     league: number;
     season: number;
   }) {
-    return this.request<any>('get', '/players/topredcards', params);
+    return this.request<Record<string, unknown>>('get', '/players/topredcards', params);
   }
 
   // Fixtures endpoints
@@ -217,7 +216,7 @@ export class FootballAPI {
     timezone?: string;
     live?: string;
   }) {
-    return this.request<any>('get', '/fixtures', params);
+    return this.request<Record<string, unknown>>('get', '/fixtures', params);
   }
 
   /**
@@ -226,7 +225,7 @@ export class FootballAPI {
    * @param team Optional team ID
    */
   async getFixtureStatistics(fixtureId: number, team?: number) {
-    return this.request<any>('get', '/fixtures/statistics', { 
+    return this.request<Record<string, unknown>>('get', '/fixtures/statistics', { 
       fixture: fixtureId,
       team
     });
@@ -240,7 +239,7 @@ export class FootballAPI {
    * @param type Optional event type
    */
   async getFixtureEvents(fixtureId: number, team?: number, player?: number, type?: string) {
-    return this.request<any>('get', '/fixtures/events', { 
+    return this.request<Record<string, unknown>>('get', '/fixtures/events', { 
       fixture: fixtureId,
       team,
       player,
@@ -254,7 +253,7 @@ export class FootballAPI {
    * @param team Optional team ID
    */
   async getFixtureLineups(fixtureId: number, team?: number) {
-    return this.request<any>('get', '/fixtures/lineups', { 
+    return this.request<Record<string, unknown>>('get', '/fixtures/lineups', { 
       fixture: fixtureId,
       team
     });
@@ -273,7 +272,7 @@ export class FootballAPI {
     to?: string;
     status?: string;
   }) {
-    return this.request<any>('get', '/fixtures/headtohead', params);
+    return this.request<Record<string, unknown>>('get', '/fixtures/headtohead', params);
   }
 
   /**
@@ -285,7 +284,7 @@ export class FootballAPI {
     season: number;
     current?: boolean;
   }) {
-    return this.request<any>('get', '/fixtures/rounds', params);
+    return this.request<Record<string, unknown>>('get', '/fixtures/rounds', params);
   }
 
   // Standings endpoints
@@ -299,7 +298,7 @@ export class FootballAPI {
     season: number;
     team?: number;
   }) {
-    return this.request<any>('get', '/standings', params);
+    return this.request<Record<string, unknown>>('get', '/standings', params);
   }
 
   // Predictions endpoints
@@ -309,7 +308,7 @@ export class FootballAPI {
    * @param fixtureId Fixture ID
    */
   async getPredictions(fixtureId: number) {
-    return this.request<any>('get', '/predictions', { fixture: fixtureId });
+    return this.request<Record<string, unknown>>('get', '/predictions', { fixture: fixtureId });
   }
 
   // Odds endpoints
@@ -327,28 +326,28 @@ export class FootballAPI {
     bookmaker?: number;
     bet?: number;
   }) {
-    return this.request<any>('get', '/odds', params);
+    return this.request<Record<string, unknown>>('get', '/odds', params);
   }
 
   /**
    * Get odds bookmakers
    */
   async getOddsBookmakers() {
-    return this.request<any>('get', '/odds/bookmakers');
+    return this.request<Record<string, unknown>>('get', '/odds/bookmakers');
   }
 
   /**
    * Get odds bets
    */
   async getOddsBets() {
-    return this.request<any>('get', '/odds/bets');
+    return this.request<Record<string, unknown>>('get', '/odds/bets');
   }
 
   /**
    * Get odds mapping
    */
   async getOddsMapping() {
-    return this.request<any>('get', '/odds/mapping');
+    return this.request<Record<string, unknown>>('get', '/odds/mapping');
   }
 
   // Transfers endpoints
@@ -361,7 +360,7 @@ export class FootballAPI {
     player?: number;
     team?: number;
   }) {
-    return this.request<any>('get', '/transfers', params);
+    return this.request<Record<string, unknown>>('get', '/transfers', params);
   }
 
   // Trophies endpoints
@@ -371,7 +370,7 @@ export class FootballAPI {
    * @param playerId Player ID
    */
   async getPlayerTrophies(playerId: number) {
-    return this.request<any>('get', '/trophies', { player: playerId });
+    return this.request<Record<string, unknown>>('get', '/trophies', { player: playerId });
   }
 
   /**
@@ -379,7 +378,7 @@ export class FootballAPI {
    * @param coachId Coach ID
    */
   async getCoachTrophies(coachId: number) {
-    return this.request<any>('get', '/trophies', { coach: coachId });
+    return this.request<Record<string, unknown>>('get', '/trophies', { coach: coachId });
   }
 
   // Venue endpoints
@@ -394,7 +393,7 @@ export class FootballAPI {
     city?: string;
     country?: string;
   }) {
-    return this.request<any>('get', '/venues', params);
+    return this.request<Record<string, unknown>>('get', '/venues', params);
   }
 
   // Coaches endpoints
@@ -408,7 +407,7 @@ export class FootballAPI {
     team?: number;
     search?: string;
   }) {
-    return this.request<any>('get', '/coachs', params);
+    return this.request<Record<string, unknown>>('get', '/coachs', params);
   }
 
   // Sidelined endpoints
@@ -421,7 +420,7 @@ export class FootballAPI {
     player?: number;
     coach?: number;
   }) {
-    return this.request<any>('get', '/sidelined', params);
+    return this.request<Record<string, unknown>>('get', '/sidelined', params);
   }
 
   // Injuries endpoints
@@ -437,6 +436,7 @@ export class FootballAPI {
     player?: number;
     fixture?: number;
   }) {
-    return this.request<any>('get', '/injuries', params);
+    return this.request<Record<string, unknown>>('get', '/injuries', params);
   }
 }
+

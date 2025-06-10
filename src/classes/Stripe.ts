@@ -27,8 +27,8 @@ export class StripeAPI {
   private async request<T>(
     method: 'get' | 'post' | 'put' | 'delete',
     endpoint: string,
-    data?: any,
-    params?: any
+    data?: Record<string, unknown>,
+    params?: Record<string, unknown>
   ): Promise<T> {
     // Convert data to URLSearchParams for proper format if data exists and method is not get
     const formData = data && method !== 'get' ? new URLSearchParams(data) : data;
@@ -53,7 +53,7 @@ export class StripeAPI {
    * Get current account balance
    */
   async getBalance() {
-    return this.request<any>('get', '/balance');
+    return this.request<Record<string, unknown>>('get', '/balance');
   }
 
   /**
@@ -61,7 +61,7 @@ export class StripeAPI {
    * @param transactionId Transaction ID
    */
   async getBalanceTransaction(transactionId: string) {
-    return this.request<any>('get', `/balance/history/${transactionId}`);
+    return this.request<Record<string, unknown>>('get', `/balance/history/${transactionId}`);
   }
 
   /**
@@ -74,7 +74,7 @@ export class StripeAPI {
     source?: string;
     type?: string;
   }) {
-    return this.request<any>('get', '/balance/history', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/balance/history', undefined, params);
   }
 
   // Charges endpoints
@@ -95,7 +95,7 @@ export class StripeAPI {
     receipt_email?: string;
     [key: string]: any;
   }) {
-    return this.request<any>('post', '/charges', data);
+    return this.request<Record<string, unknown>>('post', '/charges', data);
   }
 
   /**
@@ -103,7 +103,7 @@ export class StripeAPI {
    * @param chargeId Charge ID
    */
   async getCharge(chargeId: string) {
-    return this.request<any>('get', `/charges/${chargeId}`);
+    return this.request<Record<string, unknown>>('get', `/charges/${chargeId}`);
   }
 
   /**
@@ -116,10 +116,10 @@ export class StripeAPI {
     metadata?: Record<string, string>;
     receipt_email?: string;
     fraud_details?: Record<string, string>;
-    shipping?: Record<string, any>;
+    shipping?: Record<string, unknown>;
     transfer_group?: string;
   }) {
-    return this.request<any>('post', `/charges/${chargeId}`, data);
+    return this.request<Record<string, unknown>>('post', `/charges/${chargeId}`, data);
   }
 
   /**
@@ -133,7 +133,7 @@ export class StripeAPI {
     statement_descriptor?: string;
     application_fee_amount?: number;
   }) {
-    return this.request<any>('post', `/charges/${chargeId}/capture`, data);
+    return this.request<Record<string, unknown>>('post', `/charges/${chargeId}/capture`, data);
   }
 
   /**
@@ -145,7 +145,7 @@ export class StripeAPI {
     created?: number | { gt?: number; gte?: number; lt?: number; lte?: number };
     payment_intent?: string;
   }) {
-    return this.request<any>('get', '/charges', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/charges', undefined, params);
   }
 
   // Customers endpoints
@@ -162,10 +162,10 @@ export class StripeAPI {
     name?: string;
     payment_method?: string;
     phone?: string;
-    shipping?: Record<string, any>;
+    shipping?: Record<string, unknown>;
     source?: string;
   }) {
-    return this.request<any>('post', '/customers', data);
+    return this.request<Record<string, unknown>>('post', '/customers', data);
   }
 
   /**
@@ -173,7 +173,7 @@ export class StripeAPI {
    * @param customerId Customer ID
    */
   async getCustomer(customerId: string) {
-    return this.request<any>('get', `/customers/${customerId}`);
+    return this.request<Record<string, unknown>>('get', `/customers/${customerId}`);
   }
 
   /**
@@ -188,12 +188,12 @@ export class StripeAPI {
     metadata?: Record<string, string>;
     name?: string;
     phone?: string;
-    shipping?: Record<string, any>;
+    shipping?: Record<string, unknown>;
     source?: string;
     default_source?: string;
-    invoice_settings?: Record<string, any>;
+    invoice_settings?: Record<string, unknown>;
   }) {
-    return this.request<any>('post', `/customers/${customerId}`, data);
+    return this.request<Record<string, unknown>>('post', `/customers/${customerId}`, data);
   }
 
   /**
@@ -201,7 +201,7 @@ export class StripeAPI {
    * @param customerId Customer ID
    */
   async deleteCustomer(customerId: string) {
-    return this.request<any>('delete', `/customers/${customerId}`);
+    return this.request<Record<string, unknown>>('delete', `/customers/${customerId}`);
   }
 
   /**
@@ -212,7 +212,7 @@ export class StripeAPI {
     created?: number | { gt?: number; gte?: number; lt?: number; lte?: number };
     email?: string;
   }) {
-    return this.request<any>('get', '/customers', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/customers', undefined, params);
   }
 
   // Payment Methods endpoints
@@ -223,11 +223,11 @@ export class StripeAPI {
    */
   async createPaymentMethod(data: {
     type: string;
-    card?: Record<string, any>;
-    billing_details?: Record<string, any>;
+    card?: Record<string, unknown>;
+    billing_details?: Record<string, unknown>;
     metadata?: Record<string, string>;
   }) {
-    return this.request<any>('post', '/payment_methods', data);
+    return this.request<Record<string, unknown>>('post', '/payment_methods', data);
   }
 
   /**
@@ -235,7 +235,7 @@ export class StripeAPI {
    * @param paymentMethodId Payment method ID
    */
   async getPaymentMethod(paymentMethodId: string) {
-    return this.request<any>('get', `/payment_methods/${paymentMethodId}`);
+    return this.request<Record<string, unknown>>('get', `/payment_methods/${paymentMethodId}`);
   }
 
   /**
@@ -244,10 +244,10 @@ export class StripeAPI {
    * @param data Update data
    */
   async updatePaymentMethod(paymentMethodId: string, data: {
-    billing_details?: Record<string, any>;
+    billing_details?: Record<string, unknown>;
     metadata?: Record<string, string>;
   }) {
-    return this.request<any>('post', `/payment_methods/${paymentMethodId}`, data);
+    return this.request<Record<string, unknown>>('post', `/payment_methods/${paymentMethodId}`, data);
   }
 
   /**
@@ -259,7 +259,7 @@ export class StripeAPI {
     type: string;
     limit?: number;
   }) {
-    return this.request<any>('get', '/payment_methods', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/payment_methods', undefined, params);
   }
 
   /**
@@ -270,7 +270,7 @@ export class StripeAPI {
   async attachPaymentMethod(paymentMethodId: string, data: {
     customer: string;
   }) {
-    return this.request<any>('post', `/payment_methods/${paymentMethodId}/attach`, data);
+    return this.request<Record<string, unknown>>('post', `/payment_methods/${paymentMethodId}/attach`, data);
   }
 
   /**
@@ -278,7 +278,7 @@ export class StripeAPI {
    * @param paymentMethodId Payment method ID
    */
   async detachPaymentMethod(paymentMethodId: string) {
-    return this.request<any>('post', `/payment_methods/${paymentMethodId}/detach`);
+    return this.request<Record<string, unknown>>('post', `/payment_methods/${paymentMethodId}/detach`);
   }
 
   // Payment Intents endpoints
@@ -299,7 +299,7 @@ export class StripeAPI {
     confirm?: boolean;
     [key: string]: any;
   }) {
-    return this.request<any>('post', '/payment_intents', data);
+    return this.request<Record<string, unknown>>('post', '/payment_intents', data);
   }
 
   /**
@@ -307,7 +307,7 @@ export class StripeAPI {
    * @param paymentIntentId Payment intent ID
    */
   async getPaymentIntent(paymentIntentId: string) {
-    return this.request<any>('get', `/payment_intents/${paymentIntentId}`);
+    return this.request<Record<string, unknown>>('get', `/payment_intents/${paymentIntentId}`);
   }
 
   /**
@@ -322,11 +322,11 @@ export class StripeAPI {
     metadata?: Record<string, string>;
     payment_method_types?: string[];
     receipt_email?: string;
-    shipping?: Record<string, any>;
+    shipping?: Record<string, unknown>;
     transfer_group?: string;
     [key: string]: any;
   }) {
-    return this.request<any>('post', `/payment_intents/${paymentIntentId}`, data);
+    return this.request<Record<string, unknown>>('post', `/payment_intents/${paymentIntentId}`, data);
   }
 
   /**
@@ -338,10 +338,10 @@ export class StripeAPI {
     payment_method?: string;
     return_url?: string;
     receipt_email?: string;
-    shipping?: Record<string, any>;
+    shipping?: Record<string, unknown>;
     [key: string]: any;
   }) {
-    return this.request<any>('post', `/payment_intents/${paymentIntentId}/confirm`, data);
+    return this.request<Record<string, unknown>>('post', `/payment_intents/${paymentIntentId}/confirm`, data);
   }
 
   /**
@@ -352,7 +352,7 @@ export class StripeAPI {
   async cancelPaymentIntent(paymentIntentId: string, data?: {
     cancellation_reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer' | 'abandoned';
   }) {
-    return this.request<any>('post', `/payment_intents/${paymentIntentId}/cancel`, data);
+    return this.request<Record<string, unknown>>('post', `/payment_intents/${paymentIntentId}/cancel`, data);
   }
 
   /**
@@ -363,7 +363,7 @@ export class StripeAPI {
     customer?: string;
     created?: number | { gt?: number; gte?: number; lt?: number; lte?: number };
   }) {
-    return this.request<any>('get', '/payment_intents', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/payment_intents', undefined, params);
   }
 
   // Products endpoints
@@ -380,7 +380,7 @@ export class StripeAPI {
     images?: string[];
     [key: string]: any;
   }) {
-    return this.request<any>('post', '/products', data);
+    return this.request<Record<string, unknown>>('post', '/products', data);
   }
 
   /**
@@ -388,7 +388,7 @@ export class StripeAPI {
    * @param productId Product ID
    */
   async getProduct(productId: string) {
-    return this.request<any>('get', `/products/${productId}`);
+    return this.request<Record<string, unknown>>('get', `/products/${productId}`);
   }
 
   /**
@@ -404,7 +404,7 @@ export class StripeAPI {
     images?: string[];
     [key: string]: any;
   }) {
-    return this.request<any>('post', `/products/${productId}`, data);
+    return this.request<Record<string, unknown>>('post', `/products/${productId}`, data);
   }
 
   /**
@@ -412,7 +412,7 @@ export class StripeAPI {
    * @param productId Product ID
    */
   async deleteProduct(productId: string) {
-    return this.request<any>('delete', `/products/${productId}`);
+    return this.request<Record<string, unknown>>('delete', `/products/${productId}`);
   }
 
   /**
@@ -425,7 +425,7 @@ export class StripeAPI {
     ids?: string[];
     url?: string;
   }) {
-    return this.request<any>('get', '/products', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/products', undefined, params);
   }
 
   // Prices endpoints
@@ -446,7 +446,7 @@ export class StripeAPI {
     metadata?: Record<string, string>;
     [key: string]: any;
   }) {
-    return this.request<any>('post', '/prices', data);
+    return this.request<Record<string, unknown>>('post', '/prices', data);
   }
 
   /**
@@ -454,7 +454,7 @@ export class StripeAPI {
    * @param priceId Price ID
    */
   async getPrice(priceId: string) {
-    return this.request<any>('get', `/prices/${priceId}`);
+    return this.request<Record<string, unknown>>('get', `/prices/${priceId}`);
   }
 
   /**
@@ -467,7 +467,7 @@ export class StripeAPI {
     metadata?: Record<string, string>;
     active?: boolean;
   }) {
-    return this.request<any>('post', `/prices/${priceId}`, data);
+    return this.request<Record<string, unknown>>('post', `/prices/${priceId}`, data);
   }
 
   /**
@@ -480,7 +480,7 @@ export class StripeAPI {
     product?: string;
     type?: 'one_time' | 'recurring';
   }) {
-    return this.request<any>('get', '/prices', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/prices', undefined, params);
   }
 
   // Subscriptions endpoints
@@ -504,7 +504,7 @@ export class StripeAPI {
     trial_period_days?: number;
     [key: string]: any;
   }) {
-    return this.request<any>('post', '/subscriptions', data);
+    return this.request<Record<string, unknown>>('post', '/subscriptions', data);
   }
 
   /**
@@ -512,7 +512,7 @@ export class StripeAPI {
    * @param subscriptionId Subscription ID
    */
   async getSubscription(subscriptionId: string) {
-    return this.request<any>('get', `/subscriptions/${subscriptionId}`);
+    return this.request<Record<string, unknown>>('get', `/subscriptions/${subscriptionId}`);
   }
 
   /**
@@ -533,7 +533,7 @@ export class StripeAPI {
     trial_end?: number | 'now';
     [key: string]: any;
   }) {
-    return this.request<any>('post', `/subscriptions/${subscriptionId}`, data);
+    return this.request<Record<string, unknown>>('post', `/subscriptions/${subscriptionId}`, data);
   }
 
   /**
@@ -546,7 +546,7 @@ export class StripeAPI {
     prorate?: boolean;
     invoice_now?: boolean;
   }) {
-    return this.request<any>('delete', `/subscriptions/${subscriptionId}`, data);
+    return this.request<Record<string, unknown>>('delete', `/subscriptions/${subscriptionId}`, data);
   }
 
   /**
@@ -559,7 +559,7 @@ export class StripeAPI {
     status?: 'active' | 'past_due' | 'unpaid' | 'canceled' | 'incomplete' | 'incomplete_expired' | 'trialing' | 'all';
     created?: number | { gt?: number; gte?: number; lt?: number; lte?: number };
   }) {
-    return this.request<any>('get', '/subscriptions', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/subscriptions', undefined, params);
   }
 
   // Invoices endpoints
@@ -578,7 +578,7 @@ export class StripeAPI {
     days_until_due?: number;
     [key: string]: any;
   }) {
-    return this.request<any>('post', '/invoices', data);
+    return this.request<Record<string, unknown>>('post', '/invoices', data);
   }
 
   /**
@@ -586,7 +586,7 @@ export class StripeAPI {
    * @param invoiceId Invoice ID
    */
   async getInvoice(invoiceId: string) {
-    return this.request<any>('get', `/invoices/${invoiceId}`);
+    return this.request<Record<string, unknown>>('get', `/invoices/${invoiceId}`);
   }
 
   /**
@@ -602,7 +602,7 @@ export class StripeAPI {
     days_until_due?: number;
     [key: string]: any;
   }) {
-    return this.request<any>('post', `/invoices/${invoiceId}`, data);
+    return this.request<Record<string, unknown>>('post', `/invoices/${invoiceId}`, data);
   }
 
   /**
@@ -610,7 +610,7 @@ export class StripeAPI {
    * @param invoiceId Invoice ID
    */
   async deleteInvoice(invoiceId: string) {
-    return this.request<any>('delete', `/invoices/${invoiceId}`);
+    return this.request<Record<string, unknown>>('delete', `/invoices/${invoiceId}`);
   }
 
   /**
@@ -621,7 +621,7 @@ export class StripeAPI {
   async finalizeInvoice(invoiceId: string, data?: {
     auto_advance?: boolean;
   }) {
-    return this.request<any>('post', `/invoices/${invoiceId}/finalize`, data);
+    return this.request<Record<string, unknown>>('post', `/invoices/${invoiceId}/finalize`, data);
   }
 
   /**
@@ -634,7 +634,7 @@ export class StripeAPI {
     payment_method?: string;
     paid_out_of_band?: boolean;
   }) {
-    return this.request<any>('post', `/invoices/${invoiceId}/pay`, data);
+    return this.request<Record<string, unknown>>('post', `/invoices/${invoiceId}/pay`, data);
   }
 
   /**
@@ -647,7 +647,7 @@ export class StripeAPI {
     status?: 'draft' | 'open' | 'paid' | 'uncollectible' | 'void';
     created?: number | { gt?: number; gte?: number; lt?: number; lte?: number };
   }) {
-    return this.request<any>('get', '/invoices', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/invoices', undefined, params);
   }
 
   // Refunds endpoints
@@ -664,7 +664,7 @@ export class StripeAPI {
     metadata?: Record<string, string>;
     [key: string]: any;
   }) {
-    return this.request<any>('post', '/refunds', data);
+    return this.request<Record<string, unknown>>('post', '/refunds', data);
   }
 
   /**
@@ -672,7 +672,7 @@ export class StripeAPI {
    * @param refundId Refund ID
    */
   async getRefund(refundId: string) {
-    return this.request<any>('get', `/refunds/${refundId}`);
+    return this.request<Record<string, unknown>>('get', `/refunds/${refundId}`);
   }
 
   /**
@@ -683,7 +683,7 @@ export class StripeAPI {
   async updateRefund(refundId: string, data: {
     metadata?: Record<string, string>;
   }) {
-    return this.request<any>('post', `/refunds/${refundId}`, data);
+    return this.request<Record<string, unknown>>('post', `/refunds/${refundId}`, data);
   }
 
   /**
@@ -695,7 +695,7 @@ export class StripeAPI {
     payment_intent?: string;
     created?: number | { gt?: number; gte?: number; lt?: number; lte?: number };
   }) {
-    return this.request<any>('get', '/refunds', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/refunds', undefined, params);
   }
 
   // Webhook endpoints
@@ -711,7 +711,7 @@ export class StripeAPI {
     metadata?: Record<string, string>;
     [key: string]: any;
   }) {
-    return this.request<any>('post', '/webhook_endpoints', data);
+    return this.request<Record<string, unknown>>('post', '/webhook_endpoints', data);
   }
 
   /**
@@ -719,7 +719,7 @@ export class StripeAPI {
    * @param webhookId Webhook ID
    */
   async getWebhook(webhookId: string) {
-    return this.request<any>('get', `/webhook_endpoints/${webhookId}`);
+    return this.request<Record<string, unknown>>('get', `/webhook_endpoints/${webhookId}`);
   }
 
   /**
@@ -734,7 +734,7 @@ export class StripeAPI {
     metadata?: Record<string, string>;
     [key: string]: any;
   }) {
-    return this.request<any>('post', `/webhook_endpoints/${webhookId}`, data);
+    return this.request<Record<string, unknown>>('post', `/webhook_endpoints/${webhookId}`, data);
   }
 
   /**
@@ -742,7 +742,7 @@ export class StripeAPI {
    * @param webhookId Webhook ID
    */
   async deleteWebhook(webhookId: string) {
-    return this.request<any>('delete', `/webhook_endpoints/${webhookId}`);
+    return this.request<Record<string, unknown>>('delete', `/webhook_endpoints/${webhookId}`);
   }
 
   /**
@@ -750,6 +750,8 @@ export class StripeAPI {
    * @param params Pagination parameters
    */
   async listWebhooks(params?: StripePaginationParams) {
-    return this.request<any>('get', '/webhook_endpoints', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/webhook_endpoints', undefined, params);
   }
 }
+
+

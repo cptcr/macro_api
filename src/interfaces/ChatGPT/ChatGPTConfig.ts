@@ -3,3 +3,4 @@ export default interface ChatGPTConfig {
     organizationId?: string;
     baseUrl?: string;
 }
+

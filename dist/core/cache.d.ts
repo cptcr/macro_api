@@ -48,6 +48,7 @@ export declare class MemoryCacheProvider extends CacheProvider {
     private cache;
     private accessOrder;
     private stats;
+    private cleanupInterval?;
     constructor(maxSize?: number, defaultTtl?: number);
     get<T>(key: string): Promise<T | null>;
     set<T>(key: string, value: T, ttl?: number): Promise<void>;
@@ -63,7 +64,8 @@ export declare class MemoryCacheProvider extends CacheProvider {
     private cleanupExpired;
 }
 /**
- * Redis cache implementation
+ * Redis cache implementation using ioredis
+ * Note: Requires 'ioredis' package to be installed
  */
 export declare class RedisCacheProvider extends CacheProvider {
     private readonly config;
@@ -72,7 +74,7 @@ export declare class RedisCacheProvider extends CacheProvider {
     private connected;
     private stats;
     constructor(config: NonNullable<CacheConfig['redis']>, defaultTtl?: number);
-    private connect;
+    private ensureConnection;
     get<T>(key: string): Promise<T | null>;
     set<T>(key: string, value: T, ttl?: number): Promise<void>;
     delete(key: string): Promise<boolean>;

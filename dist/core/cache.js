@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -102,6 +125,9 @@ class MemoryCacheProvider extends CacheProvider {
         return { ...this.stats };
     }
     async close() {
+        if (this.cleanupInterval) {
+            clearInterval(this.cleanupInterval);
+        }
         this.cache.clear();
         this.accessOrder.clear();
     }
@@ -134,7 +160,7 @@ class MemoryCacheProvider extends CacheProvider {
     }
     startCleanupTimer() {
         // Clean up expired entries every 5 minutes
-        setInterval(() => {
+        this.cleanupInterval = setInterval(() => {
             this.cleanupExpired();
         }, 5 * 60 * 1000);
     }
@@ -155,7 +181,8 @@ class MemoryCacheProvider extends CacheProvider {
 }
 exports.MemoryCacheProvider = MemoryCacheProvider;
 /**
- * Redis cache implementation
+ * Redis cache implementation using ioredis
+ * Note: Requires 'ioredis' package to be installed
  */
 class RedisCacheProvider extends CacheProvider {
     constructor(config, defaultTtl = 3600) {
@@ -173,29 +200,37 @@ class RedisCacheProvider extends CacheProvider {
             size: 0,
             hitRate: 0
         };
-        this.connect();
+        // Don't auto-connect in constructor to avoid blocking
     }
-    async connect() {
+    async ensureConnection() {
+        if (this.connected && this.client) {
+            return;
+        }
         try {
-            // In a real implementation, you would use a Redis client like ioredis
-            // For this example, we'll simulate Redis functionality
-            console.warn('Redis cache provider is simulated. Install ioredis for production use.');
+            // Dynamic import to handle optional dependency
+            const Redis = await Promise.resolve().then(() => __importStar(require('ioredis'))).catch(() => {
+                throw new Error('Redis cache requires ioredis package. Install with: npm install ioredis');
+            });
+            this.client = new Redis.default(this.config.url, {
+                password: this.config.password,
+                db: this.config.db || 0,
+                maxRetriesPerRequest: 3,
+                lazyConnect: true,
+                retryStrategy: (times) => Math.min(times * 100, 3000)
+            });
+            await this.client.connect();
             this.connected = true;
         }
         catch (error) {
             console.error('Failed to connect to Redis:', error);
-            throw new Error('Redis connection failed');
+            throw new Error(`Redis connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
     async get(key) {
-        if (!this.connected) {
-            throw new Error('Redis not connected');
-        }
+        await this.ensureConnection();
         try {
             const fullKey = this.getFullKey(key);
-            // Simulate Redis get operation
-            // In real implementation: const value = await this.client.get(fullKey);
-            const value = null; // Simulated
+            const value = await this.client.get(fullKey);
             if (value === null) {
                 this.stats.misses++;
                 this.updateHitRate();
@@ -207,19 +242,18 @@ class RedisCacheProvider extends CacheProvider {
         }
         catch (error) {
             console.error('Redis get error:', error);
-            throw error;
+            this.stats.misses++;
+            this.updateHitRate();
+            return null;
         }
     }
     async set(key, value, ttl) {
-        if (!this.connected) {
-            throw new Error('Redis not connected');
-        }
+        await this.ensureConnection();
         try {
             const fullKey = this.getFullKey(key);
             const serializedValue = JSON.stringify(value);
             const expireTime = ttl || this.defaultTtl;
-            // Simulate Redis setex operation
-            // In real implementation: await this.client.setex(fullKey, expireTime, serializedValue);
+            await this.client.setex(fullKey, expireTime, serializedValue);
             this.stats.sets++;
         }
         catch (error) {
@@ -228,14 +262,10 @@ class RedisCacheProvider extends CacheProvider {
         }
     }
     async delete(key) {
-        if (!this.connected) {
-            throw new Error('Redis not connected');
-        }
+        await this.ensureConnection();
         try {
             const fullKey = this.getFullKey(key);
-            // Simulate Redis del operation
-            // In real implementation: const result = await this.client.del(fullKey);
-            const result = 0; // Simulated
+            const result = await this.client.del(fullKey);
             if (result > 0) {
                 this.stats.deletes++;
                 return true;
@@ -244,21 +274,17 @@ class RedisCacheProvider extends CacheProvider {
         }
         catch (error) {
             console.error('Redis delete error:', error);
-            throw error;
+            return false;
         }
     }
     async clear() {
-        if (!this.connected) {
-            throw new Error('Redis not connected');
-        }
+        await this.ensureConnection();
         try {
             const pattern = this.getFullKey('*');
-            // Simulate Redis key deletion with pattern
-            // In real implementation:
-            // const keys = await this.client.keys(pattern);
-            // if (keys.length > 0) {
-            //   await this.client.del(...keys);
-            // }
+            const keys = await this.client.keys(pattern);
+            if (keys.length > 0) {
+                await this.client.del(...keys);
+            }
         }
         catch (error) {
             console.error('Redis clear error:', error);
@@ -266,27 +292,23 @@ class RedisCacheProvider extends CacheProvider {
         }
     }
     async has(key) {
-        if (!this.connected) {
-            throw new Error('Redis not connected');
-        }
+        await this.ensureConnection();
         try {
             const fullKey = this.getFullKey(key);
-            // Simulate Redis exists operation
-            // In real implementation: const exists = await this.client.exists(fullKey);
-            const exists = 0; // Simulated
-            return exists === 1;
+            const exists = await this.client.exists(fullKey);
+            return exists > 0;
         }
         catch (error) {
             console.error('Redis has error:', error);
-            throw error;
+            return false;
         }
     }
     async getStats() {
         return { ...this.stats };
     }
     async close() {
-        if (this.client) {
-            // In real implementation: await this.client.quit();
+        if (this.client && this.connected) {
+            await this.client.quit();
             this.connected = false;
         }
     }
@@ -316,48 +338,83 @@ class HybridCacheProvider extends CacheProvider {
             return value;
         }
         // Try L2 cache
-        value = await this.l2Cache.get(key);
-        if (value !== null) {
-            // Promote to L1 cache
-            await this.l1Cache.set(key, value);
-            return value;
+        try {
+            value = await this.l2Cache.get(key);
+            if (value !== null) {
+                // Promote to L1 cache
+                await this.l1Cache.set(key, value);
+                return value;
+            }
+        }
+        catch (error) {
+            console.warn('L2 cache error, falling back to L1 only:', error);
         }
         return null;
     }
     async set(key, value, ttl) {
-        // Set in both caches
-        await Promise.all([
-            this.l1Cache.set(key, value, ttl),
-            this.l2Cache.set(key, value, ttl)
-        ]);
+        // Set in L1 cache first (always succeeds)
+        await this.l1Cache.set(key, value, ttl);
+        // Try to set in L2 cache (may fail)
+        try {
+            await this.l2Cache.set(key, value, ttl);
+        }
+        catch (error) {
+            console.warn('L2 cache set failed, continuing with L1 only:', error);
+        }
     }
     async delete(key) {
-        // Delete from both caches
-        const [l1Result, l2Result] = await Promise.all([
-            this.l1Cache.delete(key),
-            this.l2Cache.delete(key)
-        ]);
+        const l1Result = await this.l1Cache.delete(key);
+        let l2Result = false;
+        try {
+            l2Result = await this.l2Cache.delete(key);
+        }
+        catch (error) {
+            console.warn('L2 cache delete failed:', error);
+        }
         return l1Result || l2Result;
     }
     async clear() {
-        await Promise.all([
-            this.l1Cache.clear(),
-            this.l2Cache.clear()
-        ]);
+        await this.l1Cache.clear();
+        try {
+            await this.l2Cache.clear();
+        }
+        catch (error) {
+            console.warn('L2 cache clear failed:', error);
+        }
     }
     async has(key) {
-        // Check L1 first, then L2
+        // Check L1 first
         const l1Has = await this.l1Cache.has(key);
         if (l1Has) {
             return true;
         }
-        return await this.l2Cache.has(key);
+        // Check L2
+        try {
+            return await this.l2Cache.has(key);
+        }
+        catch (error) {
+            console.warn('L2 cache has check failed:', error);
+            return false;
+        }
     }
     async getStats() {
-        const [l1Stats, l2Stats] = await Promise.all([
-            this.l1Cache.getStats(),
-            this.l2Cache.getStats()
-        ]);
+        const l1Stats = await this.l1Cache.getStats();
+        let l2Stats;
+        try {
+            l2Stats = await this.l2Cache.getStats();
+        }
+        catch (error) {
+            console.warn('L2 cache stats failed:', error);
+            l2Stats = {
+                hits: 0,
+                misses: 0,
+                sets: 0,
+                deletes: 0,
+                evictions: 0,
+                size: 0,
+                hitRate: 0
+            };
+        }
         return {
             hits: l1Stats.hits + l2Stats.hits,
             misses: l1Stats.misses + l2Stats.misses,
@@ -371,7 +428,9 @@ class HybridCacheProvider extends CacheProvider {
     async close() {
         await Promise.all([
             this.l1Cache.close(),
-            this.l2Cache.close()
+            this.l2Cache.close().catch(error => {
+                console.warn('L2 cache close failed:', error);
+            })
         ]);
     }
 }

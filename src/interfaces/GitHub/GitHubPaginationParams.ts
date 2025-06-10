@@ -12,3 +12,4 @@ export interface GitHubPaginationParams {
    */
   page?: number;
 }
+

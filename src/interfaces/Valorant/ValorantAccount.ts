@@ -4,3 +4,4 @@ export default interface ValorantAccount {
     name: string;
     tag: string;
 }
+

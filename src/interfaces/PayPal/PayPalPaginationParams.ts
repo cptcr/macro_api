@@ -32,3 +32,4 @@ export default interface PayPalPaginationParams {
      */
     total_required?: boolean;
   }
+

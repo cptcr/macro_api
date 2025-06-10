@@ -50,7 +50,7 @@ export class ChatGPT {
         { headers: this.getHeaders() }
       );
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.response && error.response.data) {
         throw new Error(`OpenAI API Error: ${JSON.stringify(error.response.data)}`);
       }
@@ -70,7 +70,7 @@ export class ChatGPT {
         { headers: this.getHeaders() }
       );
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.response && error.response.data) {
         throw new Error(`OpenAI API Error: ${JSON.stringify(error.response.data)}`);
       }
@@ -85,8 +85,8 @@ export class ChatGPT {
    */
   async createStreamingChatCompletion(
     options: ChatCompletionOptions,
-    onData: (data: any) => void,
-    onError?: (error: any) => void,
+    onData: (data: Record<string, unknown>) => void,
+    onError?: (error: unknown) => void,
     onEnd?: () => void
   ) {
     // Ensure stream option is set to true
@@ -121,7 +121,7 @@ export class ChatGPT {
                 const parsedData = JSON.parse(data);
                 onData(parsedData);
               } catch (e) {
-                console.warn('Error parsing OpenAI stream data:', e);
+                console.warn('Error parsing OpenAI stream data:', String(e));
               }
             }
           }
@@ -140,7 +140,7 @@ export class ChatGPT {
       
       // Return the stream so it can be canceled if needed
       return stream;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (onError) onError(error);
       throw error;
     }
@@ -215,7 +215,7 @@ export class ChatGPT {
         { headers: this.getHeaders() }
       );
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.response && error.response.data) {
         throw new Error(`OpenAI API Error: ${JSON.stringify(error.response.data)}`);
       }
@@ -229,7 +229,7 @@ export class ChatGPT {
    * @param functions Array of function definitions
    * @param model Model name to use
    */
-  async withFunctions(prompt: string, functions: any[], model: string = 'gpt-4o') {
+  async withFunctions(prompt: string, functions: Record<string, unknown>[], model: string = 'gpt-4o') {
     const messages: Message[] = [
       {
         role: 'user',
@@ -253,7 +253,7 @@ export class ChatGPT {
    * @param tools Array of tool definitions
    * @param model Model name to use
    */
-  async withTools(prompt: string, tools: any[], model: string = 'gpt-4o') {
+  async withTools(prompt: string, tools: Record<string, unknown>[], model: string = 'gpt-4o') {
     const messages: Message[] = [
       {
         role: 'user',
@@ -271,3 +271,5 @@ export class ChatGPT {
     return response.choices[0]?.message;
   }
 }
+
+

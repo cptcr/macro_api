@@ -59,7 +59,7 @@ export interface CommandResponse {
   responseType?: 'in_channel' | 'ephemeral';
   text?: string;
   blocks?: Block[];
-  attachments?: any[];
+  attachments?: Record<string, unknown>[];
 }
 
 export interface MessageResponse {
@@ -134,7 +134,7 @@ export interface User {
     fields: any;
     statusText: string;
     statusEmoji: string;
-    statusEmojiDisplayInfo: any[];
+    statusEmojiDisplayInfo: Record<string, unknown>[];
     statusExpiration: number;
     avatarHash: string;
     imageOriginal?: string;
@@ -223,7 +223,7 @@ export interface SearchResults {
       page: number;
       pages: number;
     };
-    matches: any[];
+    matches: Record<string, unknown>[];
   };
 }
 
@@ -249,7 +249,7 @@ export class SlackAPI {
   private async request<T>(
     method: 'GET' | 'POST',
     endpoint: string,
-    data?: any,
+    data?: Record<string, unknown>,
     headers?: Record<string, string>
   ): Promise<T> {
     try {
@@ -269,20 +269,20 @@ export class SlackAPI {
         timeout: 30000
       });
 
-      const result = response.data as any;
+      const result = response.data as Record<string, unknown>;
       
       if (!result.ok) {
         throw new Error(`Slack API Error: ${result.error || 'Unknown error'}`);
       }
 
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.handleSlackError(error);
       throw error;
     }
   }
 
-  private handleSlackError(error: any): void {
+  private handleSlackError(error: unknown): void {
     if (error.response?.data?.error) {
       const slackError = error.response.data.error;
       throw new Error(`Slack API Error: ${slackError}`);
@@ -297,7 +297,7 @@ export class SlackAPI {
     text: string, 
     options?: MessageOptions
   ): Promise<MessageResponse> {
-    const data: any = {
+    const data: Record<string, unknown> = {
       channel,
       text
     };
@@ -347,7 +347,7 @@ export class SlackAPI {
     // Remove invalid characters and convert to lowercase
     const channelName = name.toLowerCase().replace(/[^a-z0-9-_]/g, '-');
     
-    const data: any = {
+    const data: Record<string, unknown> = {
       name: channelName
     };
 
@@ -402,7 +402,7 @@ export class SlackAPI {
    * Set a reminder
    */
   async setReminder(text: string, time: string, user?: string): Promise<Reminder> {
-    const data: any = {
+    const data: Record<string, unknown> = {
       text,
       time
     };
@@ -417,7 +417,7 @@ export class SlackAPI {
    * Search messages
    */
   async searchMessages(query: string, options?: SearchOptions): Promise<SearchResults> {
-    const data: any = {
+    const data: Record<string, unknown> = {
       query
     };
 
@@ -529,7 +529,7 @@ export class SlackAPI {
    * Get channel list
    */
   async getChannels(excludeArchived: boolean = true): Promise<Channel[]> {
-    const data: any = {
+    const data: Record<string, unknown> = {
       exclude_archived: excludeArchived,
       types: 'public_channel,private_channel'
     };
@@ -590,7 +590,7 @@ export class SlackAPI {
    * Update a message
    */
   async updateMessage(channel: string, ts: string, text: string, blocks?: Block[]): Promise<MessageResponse> {
-    const data: any = {
+    const data: Record<string, unknown> = {
       channel,
       ts,
       text
@@ -636,7 +636,7 @@ export class SlackAPI {
   /**
    * Get team information
    */
-  async getTeamInfo(): Promise<any> {
+  async getTeamInfo(): Promise<Record<string, unknown>> {
     const response = await this.request<{ team: any }>('GET', 'team.info');
     return response.team;
   }
@@ -653,3 +653,6 @@ export class SlackAPI {
     }
   }
 }
+
+
+

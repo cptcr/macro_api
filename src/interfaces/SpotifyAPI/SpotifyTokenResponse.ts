@@ -6,3 +6,4 @@ export default interface SpotifyTokenResponse {
     refresh_token?: string;
   }
   
+

@@ -6,3 +6,4 @@ export default interface NotificationOptions {
     includeDescription?: boolean;
     mentionEveryone?: boolean;
   }
+
