@@ -1,0 +1,442 @@
+# macro_api CI/CD Pipeline
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ created ]
+
+env:
+  NODE_VERSION: '18.x'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Quality Gate - Linting, Formatting, Type Checking
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Check code formatting
+      run: npm run format:check
+    
+    - name: Lint code
+      run: npm run lint
+    
+    - name: Type checking
+      run: npm run type-check
+    
+    - name: Check for security vulnerabilities
+      run: npm audit --audit-level=moderate
+    
+    - name: Build project
+      run: npm run build
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: dist/
+        retention-days: 7
+
+  # Unit Tests
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    
+    strategy:
+      matrix:
+        node-version: ['16.x', '18.x', '20.x']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run unit tests
+      run: npm run test:unit -- --coverage --watchAll=false
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  # Integration Tests with Real APIs (Sandbox)
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      localstack:
+        image: localstack/localstack:latest
+        ports:
+          - 4566:4566
+        env:
+          SERVICES: s3
+          DEBUG: 1
+          DATA_DIR: /tmp/localstack/data
+          LAMBDA_EXECUTOR: local
+        options: >-
+          --health-cmd "curl -f http://localhost:4566/_localstack/health"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Wait for services to be ready
+      run: |
+        # Wait for Redis
+        timeout 30 bash -c 'until redis-cli -h localhost -p 6379 ping; do sleep 1; done'
+        
+        # Wait for LocalStack
+        timeout 60 bash -c 'until curl -f http://localhost:4566/_localstack/health; do sleep 2; done'
+    
+    - name: Setup test environment
+      run: |
+        # Create S3 bucket in LocalStack
+        aws --endpoint-url=http://localhost:4566 s3 mb s3://test-bucket
+      env:
+        AWS_ACCESS_KEY_ID: test
+        AWS_SECRET_ACCESS_KEY: test
+        AWS_DEFAULT_REGION: us-east-1
+    
+    - name: Run integration tests
+      run: npm run test:integration
+      env:
+        # Test API Keys (sandbox/test keys only)
+        STRIPE_TEST_KEY: ${{ secrets.STRIPE_TEST_KEY }}
+        SLACK_TEST_TOKEN: ${{ secrets.SLACK_TEST_TOKEN }}
+        SENDGRID_TEST_KEY: ${{ secrets.SENDGRID_TEST_KEY }}
+        VERCEL_TEST_TOKEN: ${{ secrets.VERCEL_TEST_TOKEN }}
+        DOCKERHUB_TEST_TOKEN: ${{ secrets.DOCKERHUB_TEST_TOKEN }}
+        
+        # Local test services
+        REDIS_URL: redis://localhost:6379
+        AWS_ENDPOINT_URL: http://localhost:4566
+        AWS_ACCESS_KEY_ID: test
+        AWS_SECRET_ACCESS_KEY: test
+        AWS_DEFAULT_REGION: us-east-1
+        S3_TEST_BUCKET: test-bucket
+        
+        # Test configuration
+        NODE_ENV: test
+        LOG_LEVEL: error
+
+  # Security Scanning
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run security audit
+      run: npm audit --audit-level=moderate
+    
+    - name: Run Snyk security scan
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high
+    
+    - name: Upload Snyk results to GitHub
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: snyk.sarif
+
+  # Performance Testing
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests]
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run performance tests
+      run: npm run test:performance
+    
+    - name: Performance regression check
+      run: npm run test:performance:compare
+      continue-on-error: true
+
+  # Package Testing
+  package-validation:
+    name: Package Validation
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build package
+      run: npm run build
+    
+    - name: Package dry run
+      run: npm pack --dry-run
+    
+    - name: Test package installation
+      run: |
+        # Create a test directory
+        mkdir -p test-install
+        cd test-install
+        
+        # Initialize a new package
+        npm init -y
+        
+        # Install the local package
+        npm install ../macro_api-*.tgz
+        
+        # Test basic import
+        node -e "
+          const { StripeAPI, SlackAPI } = require('macro_api');
+          console.log('Package imports successfully');
+          console.log('StripeAPI:', typeof StripeAPI);
+          console.log('SlackAPI:', typeof SlackAPI);
+        "
+    
+    - name: Test TypeScript declarations
+      run: |
+        cd test-install
+        
+        # Install TypeScript
+        npm install typescript @types/node
+        
+        # Create a TypeScript test file
+        cat > test.ts << 'EOF'
+        import { StripeAPI, SlackAPI, SendGridAPI } from 'macro_api';
+        
+        // Test type checking
+        const stripe = new StripeAPI({ secretKey: 'test' });
+        const slack = new SlackAPI({ botToken: 'test' });
+        const sendgrid = new SendGridAPI({ apiKey: 'test' });
+        
+        console.log('TypeScript compilation successful');
+        EOF
+        
+        # Compile TypeScript
+        npx tsc test.ts --noEmit --strict
+
+  # Documentation Generation
+  docs-generation:
+    name: Generate Documentation
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Generate API documentation
+      run: npm run docs:generate
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs
+        publish_branch: gh-pages
+
+  # Release and Publish
+  publish:
+    name: Publish Package
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests, security-scan, package-validation]
+    if: github.event_name == 'release'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        registry-url: 'https://registry.npmjs.org'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build for production
+      run: npm run build
+    
+    - name: Run final tests
+      run: |
+        npm run test:unit
+        npm run test:integration
+      env:
+        STRIPE_TEST_KEY: ${{ secrets.STRIPE_TEST_KEY }}
+        SLACK_TEST_TOKEN: ${{ secrets.SLACK_TEST_TOKEN }}
+        SENDGRID_TEST_KEY: ${{ secrets.SENDGRID_TEST_KEY }}
+        VERCEL_TEST_TOKEN: ${{ secrets.VERCEL_TEST_TOKEN }}
+        DOCKERHUB_TEST_TOKEN: ${{ secrets.DOCKERHUB_TEST_TOKEN }}
+    
+    - name: Validate package version
+      run: |
+        PACKAGE_VERSION=$(node -p "require('./package.json').version")
+        TAG_VERSION=${GITHUB_REF#refs/tags/v}
+        
+        if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
+          echo "Package version ($PACKAGE_VERSION) does not match tag version ($TAG_VERSION)"
+          exit 1
+        fi
+    
+    - name: Publish to npm
+      run: npm publish --access public
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    
+    - name: Create GitHub Release Notes
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const release = context.payload.release;
+          const version = release.tag_name;
+          
+          // Generate changelog from commits
+          const changelog = await github.rest.repos.generateReleaseNotes({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            tag_name: version
+          });
+          
+          // Update release with generated notes
+          await github.rest.repos.updateRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            release_id: release.id,
+            body: changelog.data.body
+          });
+    
+    - name: Notify deployment
+      run: |
+        echo "✅ Successfully published macro_api@${GITHUB_REF#refs/tags/v} to npm"
+        echo "📦 Package URL: https://www.npmjs.com/package/macro_api"
+        echo "📚 Documentation: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+
+  # Cleanup
+  cleanup:
+    name: Cleanup
+    runs-on: ubuntu-latest
+    needs: [publish]
+    if: always()
+    
+    steps:
+    - name: Cleanup artifacts
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            run_id: context.runId
+          });
+          
+          // Keep artifacts for successful releases, delete for other runs
+          if (context.eventName !== 'release') {
+            for (const artifact of artifacts.data.artifacts) {
+              if (artifact.name === 'build-artifacts') {
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id
+                });
+              }
+            }
+          }
