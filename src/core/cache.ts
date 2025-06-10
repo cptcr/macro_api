@@ -60,6 +60,7 @@ export class MemoryCacheProvider extends CacheProvider {
     size: 0,
     hitRate: 0
   };
+  private cleanupInterval?: NodeJS.Timeout;
   
   constructor(
     private readonly maxSize: number = 1000,
@@ -156,6 +157,9 @@ export class MemoryCacheProvider extends CacheProvider {
   }
 
   async close(): Promise<void> {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+    }
     this.cache.clear();
     this.accessOrder.clear();
   }
@@ -195,7 +199,7 @@ export class MemoryCacheProvider extends CacheProvider {
 
   private startCleanupTimer(): void {
     // Clean up expired entries every 5 minutes
-    setInterval(() => {
+    this.cleanupInterval = setInterval(() => {
       this.cleanupExpired();
     }, 5 * 60 * 1000);
   }
@@ -220,11 +224,12 @@ export class MemoryCacheProvider extends CacheProvider {
 }
 
 /**
- * Redis cache implementation
+ * Redis cache implementation using ioredis
+ * Note: Requires 'ioredis' package to be installed
  */
 export class RedisCacheProvider extends CacheProvider {
   private client: any = null;
-  private connected: boolean = false;
+  private connected = false;
   private stats: CacheStats = {
     hits: 0,
     misses: 0,
@@ -240,32 +245,44 @@ export class RedisCacheProvider extends CacheProvider {
     private readonly defaultTtl: number = 3600
   ) {
     super();
-    this.connect();
+    // Don't auto-connect in constructor to avoid blocking
   }
 
-  private async connect(): Promise<void> {
+  private async ensureConnection(): Promise<void> {
+    if (this.connected && this.client) {
+      return;
+    }
+
     try {
-      // In a real implementation, you would use a Redis client like ioredis
-      // For this example, we'll simulate Redis functionality
-      console.warn('Redis cache provider is simulated. Install ioredis for production use.');
+      // Dynamic import to handle optional dependency
+      const Redis = await import('ioredis').catch(() => {
+        throw new Error(
+          'Redis cache requires ioredis package. Install with: npm install ioredis'
+        );
+      });
+
+      this.client = new Redis.default(this.config.url, {
+        password: this.config.password,
+        db: this.config.db || 0,
+        maxRetriesPerRequest: 3,
+        lazyConnect: true,
+        retryStrategy: (times) => Math.min(times * 100, 3000)
+      });
+
+      await this.client.connect();
       this.connected = true;
     } catch (error) {
       console.error('Failed to connect to Redis:', error);
-      throw new Error('Redis connection failed');
+      throw new Error(`Redis connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
   async get<T>(key: string): Promise<T | null> {
-    if (!this.connected) {
-      throw new Error('Redis not connected');
-    }
+    await this.ensureConnection();
 
     try {
       const fullKey = this.getFullKey(key);
-      
-      // Simulate Redis get operation
-      // In real implementation: const value = await this.client.get(fullKey);
-      const value = null; // Simulated
+      const value = await this.client.get(fullKey);
       
       if (value === null) {
         this.stats.misses++;
@@ -279,23 +296,21 @@ export class RedisCacheProvider extends CacheProvider {
       return JSON.parse(value) as T;
     } catch (error) {
       console.error('Redis get error:', error);
-      throw error;
+      this.stats.misses++;
+      this.updateHitRate();
+      return null;
     }
   }
 
   async set<T>(key: string, value: T, ttl?: number): Promise<void> {
-    if (!this.connected) {
-      throw new Error('Redis not connected');
-    }
+    await this.ensureConnection();
 
     try {
       const fullKey = this.getFullKey(key);
       const serializedValue = JSON.stringify(value);
       const expireTime = ttl || this.defaultTtl;
 
-      // Simulate Redis setex operation
-      // In real implementation: await this.client.setex(fullKey, expireTime, serializedValue);
-      
+      await this.client.setex(fullKey, expireTime, serializedValue);
       this.stats.sets++;
     } catch (error) {
       console.error('Redis set error:', error);
@@ -304,16 +319,11 @@ export class RedisCacheProvider extends CacheProvider {
   }
 
   async delete(key: string): Promise<boolean> {
-    if (!this.connected) {
-      throw new Error('Redis not connected');
-    }
+    await this.ensureConnection();
 
     try {
       const fullKey = this.getFullKey(key);
-      
-      // Simulate Redis del operation
-      // In real implementation: const result = await this.client.del(fullKey);
-      const result = 0; // Simulated
+      const result = await this.client.del(fullKey);
       
       if (result > 0) {
         this.stats.deletes++;
@@ -323,25 +333,20 @@ export class RedisCacheProvider extends CacheProvider {
       return false;
     } catch (error) {
       console.error('Redis delete error:', error);
-      throw error;
+      return false;
     }
   }
 
   async clear(): Promise<void> {
-    if (!this.connected) {
-      throw new Error('Redis not connected');
-    }
+    await this.ensureConnection();
 
     try {
       const pattern = this.getFullKey('*');
+      const keys = await this.client.keys(pattern);
       
-      // Simulate Redis key deletion with pattern
-      // In real implementation:
-      // const keys = await this.client.keys(pattern);
-      // if (keys.length > 0) {
-      //   await this.client.del(...keys);
-      // }
-      
+      if (keys.length > 0) {
+        await this.client.del(...keys);
+      }
     } catch (error) {
       console.error('Redis clear error:', error);
       throw error;
@@ -349,21 +354,15 @@ export class RedisCacheProvider extends CacheProvider {
   }
 
   async has(key: string): Promise<boolean> {
-    if (!this.connected) {
-      throw new Error('Redis not connected');
-    }
+    await this.ensureConnection();
 
     try {
       const fullKey = this.getFullKey(key);
-      
-      // Simulate Redis exists operation
-      // In real implementation: const exists = await this.client.exists(fullKey);
-      const exists = 0; // Simulated
-      
-      return exists === 1;
+      const exists = await this.client.exists(fullKey);
+      return exists > 0;
     } catch (error) {
       console.error('Redis has error:', error);
-      throw error;
+      return false;
     }
   }
 
@@ -372,8 +371,8 @@ export class RedisCacheProvider extends CacheProvider {
   }
 
   async close(): Promise<void> {
-    if (this.client) {
-      // In real implementation: await this.client.quit();
+    if (this.client && this.connected) {
+      await this.client.quit();
       this.connected = false;
     }
   }
@@ -415,57 +414,90 @@ export class HybridCacheProvider extends CacheProvider {
     }
 
     // Try L2 cache
-    value = await this.l2Cache.get<T>(key);
-    
-    if (value !== null) {
-      // Promote to L1 cache
-      await this.l1Cache.set(key, value);
-      return value;
+    try {
+      value = await this.l2Cache.get<T>(key);
+      
+      if (value !== null) {
+        // Promote to L1 cache
+        await this.l1Cache.set(key, value);
+        return value;
+      }
+    } catch (error) {
+      console.warn('L2 cache error, falling back to L1 only:', error);
     }
 
     return null;
   }
 
   async set<T>(key: string, value: T, ttl?: number): Promise<void> {
-    // Set in both caches
-    await Promise.all([
-      this.l1Cache.set(key, value, ttl),
-      this.l2Cache.set(key, value, ttl)
-    ]);
+    // Set in L1 cache first (always succeeds)
+    await this.l1Cache.set(key, value, ttl);
+    
+    // Try to set in L2 cache (may fail)
+    try {
+      await this.l2Cache.set(key, value, ttl);
+    } catch (error) {
+      console.warn('L2 cache set failed, continuing with L1 only:', error);
+    }
   }
 
   async delete(key: string): Promise<boolean> {
-    // Delete from both caches
-    const [l1Result, l2Result] = await Promise.all([
-      this.l1Cache.delete(key),
-      this.l2Cache.delete(key)
-    ]);
+    const l1Result = await this.l1Cache.delete(key);
+    
+    let l2Result = false;
+    try {
+      l2Result = await this.l2Cache.delete(key);
+    } catch (error) {
+      console.warn('L2 cache delete failed:', error);
+    }
 
     return l1Result || l2Result;
   }
 
   async clear(): Promise<void> {
-    await Promise.all([
-      this.l1Cache.clear(),
-      this.l2Cache.clear()
-    ]);
+    await this.l1Cache.clear();
+    
+    try {
+      await this.l2Cache.clear();
+    } catch (error) {
+      console.warn('L2 cache clear failed:', error);
+    }
   }
 
   async has(key: string): Promise<boolean> {
-    // Check L1 first, then L2
+    // Check L1 first
     const l1Has = await this.l1Cache.has(key);
     if (l1Has) {
       return true;
     }
 
-    return await this.l2Cache.has(key);
+    // Check L2
+    try {
+      return await this.l2Cache.has(key);
+    } catch (error) {
+      console.warn('L2 cache has check failed:', error);
+      return false;
+    }
   }
 
   async getStats(): Promise<CacheStats> {
-    const [l1Stats, l2Stats] = await Promise.all([
-      this.l1Cache.getStats(),
-      this.l2Cache.getStats()
-    ]);
+    const l1Stats = await this.l1Cache.getStats();
+    
+    let l2Stats: CacheStats;
+    try {
+      l2Stats = await this.l2Cache.getStats();
+    } catch (error) {
+      console.warn('L2 cache stats failed:', error);
+      l2Stats = {
+        hits: 0,
+        misses: 0,
+        sets: 0,
+        deletes: 0,
+        evictions: 0,
+        size: 0,
+        hitRate: 0
+      };
+    }
 
     return {
       hits: l1Stats.hits + l2Stats.hits,
@@ -481,7 +513,9 @@ export class HybridCacheProvider extends CacheProvider {
   async close(): Promise<void> {
     await Promise.all([
       this.l1Cache.close(),
-      this.l2Cache.close()
+      this.l2Cache.close().catch(error => {
+        console.warn('L2 cache close failed:', error);
+      })
     ]);
   }
 }

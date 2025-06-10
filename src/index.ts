@@ -1,3 +1,6 @@
+import { CacheManager, CacheConfig } from './core/cache';
+import { RetryManager } from './core/errors';
+
 // Core API Classes
 export { YouTubeNotify } from './classes/YouTubeNotify';
 export { SpotifyAPI } from './classes/SpotifyAPI';
@@ -5,6 +8,7 @@ export { Valorant } from './classes/Valorant';
 export { DeepSeek } from './classes/DeepSeek';
 export { ChatGPT } from './classes/ChatGPT';
 export { FootballAPI } from './classes/APIFootball';
+export { GitHubAPI } from './classes/GitHub';
 export { NotionAPI } from './classes/Notion';
 export { PayPalAPI } from './classes/PayPal';
 export { StripeAPI } from './classes/Stripe';
@@ -17,7 +21,13 @@ export { S3API } from './classes/S3API';
 export { DockerHubAPI } from './classes/DockerHubAPI';
 
 // Core Infrastructure
-export { CacheManager, MemoryCacheProvider, RedisCacheProvider, HybridCacheProvider } from './core/cache';
+export { 
+  CacheManager, 
+  MemoryCacheProvider, 
+  RedisCacheProvider, 
+  HybridCacheProvider 
+} from './core/cache';
+
 export {
   MacroApiError,
   AuthenticationError,
@@ -37,6 +47,18 @@ export {
   CircuitBreaker
 } from './core/errors';
 
+// Type Definitions - Core Infrastructure
+export type {
+  CacheConfig,
+  CacheEntry,
+  CacheStats,
+  CacheProvider
+} from './core/cache';
+
+export type {
+  ValidationIssue
+} from './core/errors';
+
 // Type Definitions - Slack
 export type {
   SlackConfig,
@@ -44,7 +66,7 @@ export type {
   Block,
   FileOptions,
   ChannelOptions,
-  SearchOptions,
+  SearchOptions as SlackSearchOptions,
   SlashCommandPayload,
   CommandResponse,
   MessageResponse,
@@ -104,7 +126,7 @@ export type {
   S3Object,
   S3ObjectInfo,
   S3ObjectList,
-  DeleteResult,
+  DeleteResult as S3DeleteResult,
   CopyResult,
   AclResult
 } from './classes/S3API';
@@ -116,26 +138,13 @@ export type {
   Tag,
   TagDetails,
   TagOptions,
-  SearchOptions,
+  SearchOptions as DockerSearchOptions,
   SearchResult,
-  DeleteResult,
+  DeleteResult as DockerDeleteResult,
   DownloadStats,
   BuildTrigger,
   WebhookConfig
 } from './classes/DockerHubAPI';
-
-// Type Definitions - Cache
-export type {
-  CacheConfig,
-  CacheEntry,
-  CacheStats,
-  CacheProvider
-} from './core/cache';
-
-// Type Definitions - Errors
-export type {
-  ValidationIssue
-} from './core/errors';
 
 // Package Information
 export const VERSION = '3.0.0';
@@ -177,7 +186,7 @@ export const PACKAGE_INFO = {
     'PayPal - Payments',
     'Football API - Sports data'
   ]
-};
+} as const;
 
 /**
  * Create a unified API client with caching and error handling
@@ -219,7 +228,14 @@ export class MacroAPIClient {
       skipRetry?: boolean;
     }
   ): Promise<T> {
-    const { service = 'unknown', method = 'unknown', params = {}, cacheTtl, skipCache = false, skipRetry = false } = options || {};
+    const { 
+      service = 'unknown', 
+      method = 'unknown', 
+      params = {}, 
+      cacheTtl, 
+      skipCache = false, 
+      skipRetry = false 
+    } = options || {};
 
     // Try cache first
     if (!skipCache && this.cache) {
@@ -262,7 +278,7 @@ export class MacroAPIClient {
   /**
    * Clear cache
    */
-  async clearCache() {
+  async clearCache(): Promise<void> {
     if (this.cache) {
       await this.cache.clear();
     }
@@ -271,41 +287,9 @@ export class MacroAPIClient {
   /**
    * Close connections and cleanup
    */
-  async close() {
+  async close(): Promise<void> {
     if (this.cache) {
       await this.cache.close();
     }
   }
 }
-
-// Default export for convenience
-export default {
-  // Core APIs
-  YouTubeNotify,
-  SpotifyAPI,
-  Valorant,
-  DeepSeek,
-  ChatGPT,
-  FootballAPI,
-  NotionAPI,
-  PayPalAPI,
-  StripeAPI,
-
-  // New APIs
-  SlackAPI,
-  SendGridAPI,
-  VercelAPI,
-  S3API,
-  DockerHubAPI,
-
-  // Infrastructure
-  CacheManager,
-  MacroAPIClient,
-  ErrorHandler,
-  RetryManager,
-  CircuitBreaker,
-
-  // Package info
-  VERSION,
-  PACKAGE_INFO
-};
