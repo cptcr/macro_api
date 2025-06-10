@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
+import { handleAxiosError, toPaginationParams } from '../utils/errorHandling';
 
 export interface DockerHubConfig {
   token: string;
@@ -102,7 +103,7 @@ export interface TagDetails {
     medium: number;
     low: number;
     unknown: number;
-  };
+  } | null;
 }
 
 export interface TagOptions {
@@ -236,18 +237,7 @@ export class DockerHubAPI {
 
       return response.data;
     } catch (error: unknown) {
-      this.handleDockerHubError(error);
-      throw error;
-    }
-  }
-
-  private handleDockerHubError(error: unknown): void {
-    if (error.response?.data?.detail) {
-      throw new Error(`Docker Hub API Error: ${error.response.data.detail}`);
-    } else if (error.response?.data?.message) {
-      throw new Error(`Docker Hub API Error: ${error.response.data.message}`);
-    } else if (error.response?.status) {
-      throw new Error(`Docker Hub API Error: HTTP ${error.response.status} - ${error.response.statusText}`);
+      handleAxiosError(error, 'Docker Hub');
     }
   }
 
@@ -331,6 +321,7 @@ export class DockerHubAPI {
    * List tags for a repository
    */
   async listTags(repository: string, options?: TagOptions): Promise<{ count: number; next?: string; previous?: string; results: Tag[] }> {
+    const [namespace, repo] = this.parseRepositoryName(repository);
     const params = new URLSearchParams();
     
     if (options?.page) params.set('page', options.page.toString());
@@ -349,6 +340,7 @@ export class DockerHubAPI {
    * Get detailed information about a specific tag
    */
   async getTagDetails(repository: string, tag: string): Promise<TagDetails> {
+    const [namespace, repo] = this.parseRepositoryName(repository);
     return this.request<TagDetails>('GET', `/repositories/${namespace}/${repo}/tags/${tag}/`);
   }
 
@@ -357,12 +349,13 @@ export class DockerHubAPI {
    */
   async deleteTag(repository: string, tag: string): Promise<DeleteResult> {
     try {
+      const [namespace, repo] = this.parseRepositoryName(repository);
       await this.request<void>('DELETE', `/repositories/${namespace}/${repo}/tags/${tag}/`);
       return { success: true };
     } catch (error: unknown) {
       return { 
         success: false, 
-        message: error.message || 'Failed to delete tag'
+        message: error instanceof Error ? error.message : 'Failed to delete tag'
       };
     }
   }
@@ -428,6 +421,7 @@ export class DockerHubAPI {
    * Star a repository
    */
   async starRepository(repository: string): Promise<void> {
+    const [namespace, repo] = this.parseRepositoryName(repository);
     await this.request<void>('POST', `/repositories/${namespace}/${repo}/stars/`);
   }
 
@@ -435,6 +429,7 @@ export class DockerHubAPI {
    * Unstar a repository
    */
   async unstarRepository(repository: string): Promise<void> {
+    const [namespace, repo] = this.parseRepositoryName(repository);
     await this.request<void>('DELETE', `/repositories/${namespace}/${repo}/stars/`);
   }
 
@@ -442,6 +437,7 @@ export class DockerHubAPI {
    * Get repository build triggers (for automated builds)
    */
   async getBuildTriggers(repository: string): Promise<BuildTrigger[]> {
+    const [namespace, repo] = this.parseRepositoryName(repository);
     const response = await this.request<{ results: BuildTrigger[] }>('GET', `/repositories/${namespace}/${repo}/autobuild/`);
     return response.results;
   }
@@ -449,7 +445,7 @@ export class DockerHubAPI {
   /**
    * Create a build trigger
    */
-  async createBuildTrigger(_repository: string, trigger: {
+  async createBuildTrigger(repository: string, trigger: {
     name: string;
     sourceType: 'Branch' | 'Tag';
     sourceName: string;
@@ -458,6 +454,7 @@ export class DockerHubAPI {
     tag: string;
     buildArgs?: Record<string, string>;
   }): Promise<BuildTrigger> {
+    const [namespace, repo] = this.parseRepositoryName(repository);
     const data = {
       name: trigger.name,
       source_type: trigger.sourceType,
@@ -477,17 +474,19 @@ export class DockerHubAPI {
   /**
    * Delete a build trigger
    */
-  async deleteBuildTrigger(_repository: string, triggerId: string): Promise<void> {
+  async deleteBuildTrigger(repository: string, triggerId: string): Promise<void> {
+    const [namespace, repo] = this.parseRepositoryName(repository);
     await this.request<void>('DELETE', `/repositories/${namespace}/${repo}/autobuild/${triggerId}/`);
   }
 
   /**
    * Trigger a build
    */
-  async triggerBuild(_repository: string, options?: {
+  async triggerBuild(repository: string, options?: {
     sourceType?: 'Branch' | 'Tag';
     sourceName?: string;
   }): Promise<{ build_tag: string; request_id: string }> {
+    const [namespace, repo] = this.parseRepositoryName(repository);
     const data: Record<string, unknown> = {};
     if (options?.sourceType) data.source_type = options.sourceType;
     if (options?.sourceName) data.source_name = options.sourceName;
@@ -498,7 +497,8 @@ export class DockerHubAPI {
   /**
    * Get repository webhooks
    */
-  async getWebhooks(_repository: string): Promise<WebhookConfig[]> {
+  async getWebhooks(repository: string): Promise<WebhookConfig[]> {
+    const [namespace, repo] = this.parseRepositoryName(repository);
     const response = await this.request<{ results: WebhookConfig[] }>('GET', `/repositories/${namespace}/${repo}/webhooks/`);
     return response.results;
   }
@@ -511,6 +511,7 @@ export class DockerHubAPI {
     webhookUrl: string;
     expectFinalCallback?: boolean;
   }): Promise<WebhookConfig> {
+    const [namespace, repo] = this.parseRepositoryName(repository);
     const data = {
       name: webhook.name,
       webhook_url: webhook.webhookUrl,
@@ -529,6 +530,7 @@ export class DockerHubAPI {
     active?: boolean;
     expectFinalCallback?: boolean;
   }): Promise<WebhookConfig> {
+    const [namespace, repo] = this.parseRepositoryName(repository);
     const data: Record<string, unknown> = {};
     if (updates.name !== undefined) data.name = updates.name;
     if (updates.webhookUrl !== undefined) data.webhook_url = updates.webhookUrl;
@@ -542,6 +544,7 @@ export class DockerHubAPI {
    * Delete a webhook
    */
   async deleteWebhook(repository: string, webhookId: string): Promise<void> {
+    const [namespace, repo] = this.parseRepositoryName(repository);
     await this.request<void>('DELETE', `/repositories/${namespace}/${repo}/webhooks/${webhookId}/`);
   }
 
@@ -555,7 +558,7 @@ export class DockerHubAPI {
   /**
    * Get user's organizations
    */
-  async getUserOrganizations(): Promise<any[]> {
+  async getUserOrganizations(): Promise<Record<string, unknown>[]> {
     const response = await this.request<{ results: Record<string, unknown>[] }>('GET', '/user/orgs/');
     return response.results;
   }
@@ -577,24 +580,13 @@ export class DockerHubAPI {
   }
 
   /**
-   * Validate repository name
-   */
-  private validateRepositoryName(name: string): boolean {
-    // Docker repository names must be lowercase and can contain letters, digits, hyphens, underscores, and periods
-    const repositoryRegex = /^[a-z0-9._-]+$/;
-    const [namespace, repo] = this.parseRepositoryName(name);
-    
-    return repositoryRegex.test(namespace) && repositoryRegex.test(repo);
-  }
-
-  /**
    * Test API connection
    */
   async testConnection(): Promise<boolean> {
     try {
       await this.getCurrentUser();
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       return false;
     }
   }
@@ -602,11 +594,11 @@ export class DockerHubAPI {
   /**
    * Get repository vulnerability scan results (if available)
    */
-  async getVulnerabilityReport(repository: string, tag: string): Promise<Record<string, unknown>> {
+  async getVulnerabilityReport(repository: string, tag: string): Promise<Record<string, unknown> | null> {
     try {
       const tagDetails = await this.getTagDetails(repository, tag);
       return tagDetails.vulnerabilities || null;
-    } catch (error) {
+    } catch (error: unknown) {
       return null;
     }
   }
@@ -616,9 +608,10 @@ export class DockerHubAPI {
    */
   async getManifest(repository: string, tag: string): Promise<Record<string, unknown>> {
     try {
+      const [namespace, repo] = this.parseRepositoryName(repository);
       return this.request<Record<string, unknown>>('GET', `/repositories/${namespace}/${repo}/tags/${tag}/images/`);
-    } catch (error) {
-      throw new Error(`Failed to get manifest for ${repository}:${tag}`);
+    } catch (error: unknown) {
+      handleAxiosError(error, 'Docker Hub');
     }
   }
 
@@ -630,7 +623,7 @@ export class DockerHubAPI {
       await this.getRepository(name);
       return true;
     } catch (error: unknown) {
-      if (error.message?.includes('404')) {
+      if (error instanceof Error && error.message.includes('404')) {
         return false;
       }
       throw error;
@@ -645,13 +638,10 @@ export class DockerHubAPI {
       await this.getTagDetails(repository, tag);
       return true;
     } catch (error: unknown) {
-      if (error.message?.includes('404')) {
+      if (error instanceof Error && error.message.includes('404')) {
         return false;
       }
       throw error;
     }
   }
 }
-
-
-

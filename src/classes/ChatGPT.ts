@@ -3,6 +3,7 @@ import ChatGPTConfig from '../interfaces/ChatGPT/ChatGPTConfig';
 import Message from '../interfaces/ChatGPT/Mesage';
 import ChatCompletionOptions from '../interfaces/ChatGPT/ChatCompletionOptions';
 import EmbeddingOptions from '../interfaces/ChatGPT/EmbeddingOptions';
+import { handleAxiosError } from '../utils/errorHandling';
 
 /**
  * ChatGPT API client for interacting with OpenAI's models
@@ -51,10 +52,7 @@ export class ChatGPT {
       );
       return response.data;
     } catch (error: unknown) {
-      if (error.response && error.response.data) {
-        throw new Error(`OpenAI API Error: ${JSON.stringify(error.response.data)}`);
-      }
-      throw error;
+      handleAxiosError(error, 'OpenAI');
     }
   }
 
@@ -71,10 +69,7 @@ export class ChatGPT {
       );
       return response.data;
     } catch (error: unknown) {
-      if (error.response && error.response.data) {
-        throw new Error(`OpenAI API Error: ${JSON.stringify(error.response.data)}`);
-      }
-      throw error;
+      handleAxiosError(error, 'OpenAI');
     }
   }
 
@@ -120,18 +115,18 @@ export class ChatGPT {
               try {
                 const parsedData = JSON.parse(data);
                 onData(parsedData);
-              } catch (e) {
-                console.warn('Error parsing OpenAI stream data:', String(e));
+              } catch (parseError: unknown) {
+                console.warn('Error parsing OpenAI stream data:', String(parseError));
               }
             }
           }
-        } catch (e) {
-          if (onError) onError(e);
+        } catch (processingError: unknown) {
+          if (onError) onError(processingError);
         }
       });
       
-      stream.on('error', (err: any) => {
-        if (onError) onError(err);
+      stream.on('error', (streamError: unknown) => {
+        if (onError) onError(streamError);
       });
       
       stream.on('end', () => {
@@ -142,7 +137,7 @@ export class ChatGPT {
       return stream;
     } catch (error: unknown) {
       if (onError) onError(error);
-      throw error;
+      handleAxiosError(error, 'OpenAI');
     }
   }
 
@@ -216,10 +211,7 @@ export class ChatGPT {
       );
       return response.data;
     } catch (error: unknown) {
-      if (error.response && error.response.data) {
-        throw new Error(`OpenAI API Error: ${JSON.stringify(error.response.data)}`);
-      }
-      throw error;
+      handleAxiosError(error, 'OpenAI');
     }
   }
 
@@ -271,5 +263,3 @@ export class ChatGPT {
     return response.choices[0]?.message;
   }
 }
-
-

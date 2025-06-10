@@ -4,6 +4,7 @@ import ChatMessage from '../interfaces/DeepSeek/ChatMessage';
 import ChatCompletionOptions from '../interfaces/DeepSeek/ChatCompletionOptions';
 import CompletionOptions from '../interfaces/DeepSeek/CompletionOptions';
 import EmbeddingOptions from '../interfaces/DeepSeek/EmbeddingOptions';
+import { handleAxiosError } from '../utils/errorHandling';
 
 /**
  * DeepSeek API client for interacting with DeepSeek's AI models
@@ -44,10 +45,7 @@ export class DeepSeek {
       );
       return response.data;
     } catch (error: unknown) {
-      if (error.response && error.response.data) {
-        throw new Error(`DeepSeek API Error: ${JSON.stringify(error.response.data)}`);
-      }
-      throw error;
+      handleAxiosError(error, 'DeepSeek');
     }
   }
 
@@ -64,10 +62,7 @@ export class DeepSeek {
       );
       return response.data;
     } catch (error: unknown) {
-      if (error.response && error.response.data) {
-        throw new Error(`DeepSeek API Error: ${JSON.stringify(error.response.data)}`);
-      }
-      throw error;
+      handleAxiosError(error, 'DeepSeek');
     }
   }
 
@@ -84,10 +79,7 @@ export class DeepSeek {
       );
       return response.data;
     } catch (error: unknown) {
-      if (error.response && error.response.data) {
-        throw new Error(`DeepSeek API Error: ${JSON.stringify(error.response.data)}`);
-      }
-      throw error;
+      handleAxiosError(error, 'DeepSeek');
     }
   }
 
@@ -133,18 +125,18 @@ export class DeepSeek {
               try {
                 const parsedData = JSON.parse(data);
                 onData(parsedData);
-              } catch (e) {
-                console.warn('Error parsing DeepSeek stream data:', String(e));
+              } catch (parseError: unknown) {
+                console.warn('Error parsing DeepSeek stream data:', String(parseError));
               }
             }
           }
-        } catch (e) {
-          if (onError) onError(e);
+        } catch (processingError: unknown) {
+          if (onError) onError(processingError);
         }
       });
       
-      stream.on('error', (err: any) => {
-        if (onError) onError(err);
+      stream.on('error', (streamError: unknown) => {
+        if (onError) onError(streamError);
       });
       
       stream.on('end', () => {
@@ -155,7 +147,7 @@ export class DeepSeek {
       return stream;
     } catch (error: unknown) {
       if (onError) onError(error);
-      throw error;
+      handleAxiosError(error, 'DeepSeek');
     }
   }
 
@@ -192,10 +184,7 @@ export class DeepSeek {
       );
       return response.data;
     } catch (error: unknown) {
-      if (error.response && error.response.data) {
-        throw new Error(`DeepSeek API Error: ${JSON.stringify(error.response.data)}`);
-      }
-      throw error;
+      handleAxiosError(error, 'DeepSeek');
     }
   }
 
@@ -244,5 +233,3 @@ export class DeepSeek {
     return response.choices[0]?.message?.content || '';
   }
 }
-
-
