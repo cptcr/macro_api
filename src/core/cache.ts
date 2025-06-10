@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { toString, getProperty } from '../utils/errorHandling';
 
 export interface CacheConfig {
   type: 'memory' | 'redis' | 'hybrid';
@@ -228,7 +229,7 @@ export class MemoryCacheProvider extends CacheProvider {
  * Note: Requires 'ioredis' package to be installed
  */
 export class RedisCacheProvider extends CacheProvider {
-  private client: Record<string, unknown> = null;
+  private client: any = null; // Using any instead of Record<string, unknown>
   private connected = false;
   private stats: CacheStats = {
     hits: 0,
@@ -271,9 +272,9 @@ export class RedisCacheProvider extends CacheProvider {
 
       await this.client.connect();
       this.connected = true;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to connect to Redis:', error);
-      throw new Error(`Redis connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Redis connection failed: ${toString(error)}`);
     }
   }
 
@@ -294,7 +295,7 @@ export class RedisCacheProvider extends CacheProvider {
       this.updateHitRate();
       
       return JSON.parse(value) as T;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Redis get error:', error);
       this.stats.misses++;
       this.updateHitRate();
@@ -312,7 +313,7 @@ export class RedisCacheProvider extends CacheProvider {
 
       await this.client.setex(fullKey, expireTime, serializedValue);
       this.stats.sets++;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Redis set error:', error);
       throw error;
     }
@@ -331,7 +332,7 @@ export class RedisCacheProvider extends CacheProvider {
       }
       
       return false;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Redis delete error:', error);
       return false;
     }
@@ -347,7 +348,7 @@ export class RedisCacheProvider extends CacheProvider {
       if (keys.length > 0) {
         await this.client.del(...keys);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Redis clear error:', error);
       throw error;
     }
@@ -360,7 +361,7 @@ export class RedisCacheProvider extends CacheProvider {
       const fullKey = this.getFullKey(key);
       const exists = await this.client.exists(fullKey);
       return exists > 0;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Redis has error:', error);
       return false;
     }
@@ -422,7 +423,7 @@ export class HybridCacheProvider extends CacheProvider {
         await this.l1Cache.set(key, value);
         return value;
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.warn('L2 cache error, falling back to L1 only:', error);
     }
 
@@ -436,7 +437,7 @@ export class HybridCacheProvider extends CacheProvider {
     // Try to set in L2 cache (may fail)
     try {
       await this.l2Cache.set(key, value, ttl);
-    } catch (error) {
+    } catch (error: unknown) {
       console.warn('L2 cache set failed, continuing with L1 only:', error);
     }
   }
@@ -447,7 +448,7 @@ export class HybridCacheProvider extends CacheProvider {
     let l2Result = false;
     try {
       l2Result = await this.l2Cache.delete(key);
-    } catch (error) {
+    } catch (error: unknown) {
       console.warn('L2 cache delete failed:', error);
     }
 
@@ -459,7 +460,7 @@ export class HybridCacheProvider extends CacheProvider {
     
     try {
       await this.l2Cache.clear();
-    } catch (error) {
+    } catch (error: unknown) {
       console.warn('L2 cache clear failed:', error);
     }
   }
@@ -474,7 +475,7 @@ export class HybridCacheProvider extends CacheProvider {
     // Check L2
     try {
       return await this.l2Cache.has(key);
-    } catch (error) {
+    } catch (error: unknown) {
       console.warn('L2 cache has check failed:', error);
       return false;
     }
@@ -486,7 +487,7 @@ export class HybridCacheProvider extends CacheProvider {
     let l2Stats: CacheStats;
     try {
       l2Stats = await this.l2Cache.getStats();
-    } catch (error) {
+    } catch (error: unknown) {
       console.warn('L2 cache stats failed:', error);
       l2Stats = {
         hits: 0,
@@ -681,5 +682,3 @@ export class CacheManager {
     await Promise.all(promises);
   }
 }
-
-

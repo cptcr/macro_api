@@ -1,6 +1,7 @@
 import axios from 'axios';
 import StripeAuthOptions from '../interfaces/Stripe/StripeAuthOptions';
 import StripePaginationParams from '../interfaces/Stripe/StripePaginationParams';
+import { toPaginationParams } from '../utils/errorHandling';
 
 /**
  * Complete Stripe API wrapper for interacting with all Stripe endpoints
@@ -31,13 +32,13 @@ export class StripeAPI {
     params?: Record<string, unknown>
   ): Promise<T> {
     // Convert data to URLSearchParams for proper format if data exists and method is not get
-    const formData = data && method !== 'get' ? new URLSearchParams(data) : data;
+    const formData = data && method !== 'get' ? new URLSearchParams(data as Record<string, string>) : data;
     
     const response = await axios({
       method,
       url: `${this.baseUrl}${endpoint}`,
       data: formData,
-      params,
+      params: toPaginationParams(params),
       headers: {
         'Authorization': `Bearer ${this.secretKey}`,
         'Content-Type': method !== 'get' ? 'application/x-www-form-urlencoded' : 'application/json'
@@ -74,7 +75,7 @@ export class StripeAPI {
     source?: string;
     type?: string;
   }) {
-    return this.request<Record<string, unknown>>('get', '/balance/history', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/balance/history', undefined, toPaginationParams(params));
   }
 
   // Charges endpoints
@@ -145,7 +146,7 @@ export class StripeAPI {
     created?: number | { gt?: number; gte?: number; lt?: number; lte?: number };
     payment_intent?: string;
   }) {
-    return this.request<Record<string, unknown>>('get', '/charges', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/charges', undefined, toPaginationParams(params));
   }
 
   // Customers endpoints
@@ -212,7 +213,7 @@ export class StripeAPI {
     created?: number | { gt?: number; gte?: number; lt?: number; lte?: number };
     email?: string;
   }) {
-    return this.request<Record<string, unknown>>('get', '/customers', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/customers', undefined, toPaginationParams(params));
   }
 
   // Payment Methods endpoints
@@ -259,7 +260,7 @@ export class StripeAPI {
     type: string;
     limit?: number;
   }) {
-    return this.request<Record<string, unknown>>('get', '/payment_methods', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/payment_methods', undefined, toPaginationParams(params));
   }
 
   /**
@@ -363,7 +364,7 @@ export class StripeAPI {
     customer?: string;
     created?: number | { gt?: number; gte?: number; lt?: number; lte?: number };
   }) {
-    return this.request<Record<string, unknown>>('get', '/payment_intents', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/payment_intents', undefined, toPaginationParams(params));
   }
 
   // Products endpoints
@@ -425,7 +426,7 @@ export class StripeAPI {
     ids?: string[];
     url?: string;
   }) {
-    return this.request<Record<string, unknown>>('get', '/products', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/products', undefined, toPaginationParams(params));
   }
 
   // Prices endpoints
@@ -480,7 +481,7 @@ export class StripeAPI {
     product?: string;
     type?: 'one_time' | 'recurring';
   }) {
-    return this.request<Record<string, unknown>>('get', '/prices', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/prices', undefined, toPaginationParams(params));
   }
 
   // Subscriptions endpoints
@@ -559,7 +560,7 @@ export class StripeAPI {
     status?: 'active' | 'past_due' | 'unpaid' | 'canceled' | 'incomplete' | 'incomplete_expired' | 'trialing' | 'all';
     created?: number | { gt?: number; gte?: number; lt?: number; lte?: number };
   }) {
-    return this.request<Record<string, unknown>>('get', '/subscriptions', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/subscriptions', undefined, toPaginationParams(params));
   }
 
   // Invoices endpoints
@@ -647,7 +648,7 @@ export class StripeAPI {
     status?: 'draft' | 'open' | 'paid' | 'uncollectible' | 'void';
     created?: number | { gt?: number; gte?: number; lt?: number; lte?: number };
   }) {
-    return this.request<Record<string, unknown>>('get', '/invoices', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/invoices', undefined, toPaginationParams(params));
   }
 
   // Refunds endpoints
@@ -695,7 +696,7 @@ export class StripeAPI {
     payment_intent?: string;
     created?: number | { gt?: number; gte?: number; lt?: number; lte?: number };
   }) {
-    return this.request<Record<string, unknown>>('get', '/refunds', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/refunds', undefined, toPaginationParams(params));
   }
 
   // Webhook endpoints
@@ -750,8 +751,6 @@ export class StripeAPI {
    * @param params Pagination parameters
    */
   async listWebhooks(params?: StripePaginationParams) {
-    return this.request<Record<string, unknown>>('get', '/webhook_endpoints', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/webhook_endpoints', undefined, toPaginationParams(params));
   }
 }
-
-

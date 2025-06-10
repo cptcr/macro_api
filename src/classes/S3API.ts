@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import crypto from 'crypto';
+import { handleAxiosError, toString } from '../utils/errorHandling';
 
 export interface S3Config {
   accessKeyId: string;
@@ -312,7 +313,7 @@ export class S3API {
   }
 
   private handleS3Error(error: unknown): void {
-    if (error.response?.data) {
+    if (axios.isAxiosError(error) && error.response?.data) {
       // Try to parse XML error response
       const errorData = error.response.data;
       if (typeof errorData === 'string' && errorData.includes('<Error>')) {
@@ -324,9 +325,11 @@ export class S3API {
       }
     }
     
-    if (error.response?.status) {
-      throw new Error(`S3 API Error: HTTP ${error.response.status} - ${error.response.statusText}`);
+    if (axios.isAxiosError(error) && error.response?.status) {
+      throw new Error(`S3 API Error: HTTP ${error.response.status} - ${toString(error.response.statusText)}`);
     }
+    
+    handleAxiosError(error, 'S3');
   }
 
   /**
@@ -363,9 +366,9 @@ export class S3API {
       bucket: this.bucketName,
       key,
       etag: response.headers.etag?.replace(/"/g, '') || '',
-      versionId: response.headers['x-amz-version-id'],
-      serverSideEncryption: response.headers['x-amz-server-side-encryption'],
-      expiration: response.headers['x-amz-expiration']
+      versionId: toString(response.headers['x-amz-version-id']),
+      serverSideEncryption: toString(response.headers['x-amz-server-side-encryption']),
+      expiration: toString(response.headers['x-amz-expiration'])
     };
   }
 
@@ -396,23 +399,23 @@ export class S3API {
     Object.entries(response.headers).forEach(([headerKey, headerValue]) => {
       if (headerKey.toLowerCase().startsWith('x-amz-meta-')) {
         const metaKey = headerKey.substring(11); // Remove 'x-amz-meta-' prefix
-        metadata[metaKey] = headerValue as string;
+        metadata[metaKey] = toString(headerValue);
       }
     });
 
     return {
       body: response.data,
-      contentType: response.headers['content-type'],
-      contentLength: parseInt(response.headers['content-length'] || '0'),
+      contentType: toString(response.headers['content-type']),
+      contentLength: parseInt(toString(response.headers['content-length']) || '0'),
       etag: response.headers.etag?.replace(/"/g, ''),
-      lastModified: response.headers['last-modified'] ? new Date(response.headers['last-modified']) : undefined,
+      lastModified: response.headers['last-modified'] ? new Date(toString(response.headers['last-modified'])) : undefined,
       metadata,
-      versionId: response.headers['x-amz-version-id'],
-      cacheControl: response.headers['cache-control'],
-      contentDisposition: response.headers['content-disposition'],
-      contentEncoding: response.headers['content-encoding'],
-      contentLanguage: response.headers['content-language'],
-      expires: response.headers.expires ? new Date(response.headers.expires) : undefined
+      versionId: toString(response.headers['x-amz-version-id']),
+      cacheControl: toString(response.headers['cache-control']),
+      contentDisposition: toString(response.headers['content-disposition']),
+      contentEncoding: toString(response.headers['content-encoding']),
+      contentLanguage: toString(response.headers['content-language']),
+      expires: response.headers.expires ? new Date(toString(response.headers.expires)) : undefined
     };
   }
 
@@ -423,8 +426,8 @@ export class S3API {
     const response = await this.request<string>('DELETE', key);
 
     return {
-      deleteMarker: response.headers['x-amz-delete-marker'] === 'true',
-      versionId: response.headers['x-amz-version-id']
+      deleteMarker: toString(response.headers['x-amz-delete-marker']) === 'true',
+      versionId: toString(response.headers['x-amz-version-id'])
     };
   }
 
@@ -462,10 +465,8 @@ export class S3API {
     }
   ): Promise<string> {
     const now = new Date();
-    // expires variable removed
     const timestamp = now.toISOString().replace(/[:\-]|\.\d{3}/g, '');
     const dateStamp = timestamp.slice(0, 8);
-
 
     const url = new URL(`${this.baseUrl}/${encodeURIComponent(key).replace(/%2F/g, '/')}`);
     
@@ -554,9 +555,9 @@ export class S3API {
     
     return {
       ...copyResult,
-      versionId: response.headers['x-amz-version-id'],
-      serverSideEncryption: response.headers['x-amz-server-side-encryption'],
-      copySourceVersionId: response.headers['x-amz-copy-source-version-id']
+      versionId: toString(response.headers['x-amz-version-id']),
+      serverSideEncryption: toString(response.headers['x-amz-server-side-encryption']),
+      copySourceVersionId: toString(response.headers['x-amz-copy-source-version-id'])
     };
   }
 
@@ -599,7 +600,7 @@ export class S3API {
       await this.request('HEAD', key);
       return true;
     } catch (error: unknown) {
-      if (error.response?.status === 404) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
         return false;
       }
       throw error;
@@ -616,22 +617,22 @@ export class S3API {
     Object.entries(response.headers).forEach(([headerKey, headerValue]) => {
       if (headerKey.toLowerCase().startsWith('x-amz-meta-')) {
         const metaKey = headerKey.substring(11);
-        metadata[metaKey] = headerValue as string;
+        metadata[metaKey] = toString(headerValue);
       }
     });
 
     return {
-      contentType: response.headers['content-type'],
-      contentLength: parseInt(response.headers['content-length'] || '0'),
+      contentType: toString(response.headers['content-type']),
+      contentLength: parseInt(toString(response.headers['content-length']) || '0'),
       etag: response.headers.etag?.replace(/"/g, ''),
-      lastModified: response.headers['last-modified'] ? new Date(response.headers['last-modified']) : undefined,
+      lastModified: response.headers['last-modified'] ? new Date(toString(response.headers['last-modified'])) : undefined,
       metadata,
-      versionId: response.headers['x-amz-version-id'],
-      cacheControl: response.headers['cache-control'],
-      contentDisposition: response.headers['content-disposition'],
-      contentEncoding: response.headers['content-encoding'],
-      contentLanguage: response.headers['content-language'],
-      expires: response.headers.expires ? new Date(response.headers.expires) : undefined
+      versionId: toString(response.headers['x-amz-version-id']),
+      cacheControl: toString(response.headers['cache-control']),
+      contentDisposition: toString(response.headers['content-disposition']),
+      contentEncoding: toString(response.headers['content-encoding']),
+      contentLanguage: toString(response.headers['content-language']),
+      expires: response.headers.expires ? new Date(toString(response.headers.expires)) : undefined
     };
   }
 
@@ -762,6 +763,3 @@ export class S3API {
     }
   }
 }
-
-
-

@@ -236,37 +236,37 @@ export class VercelAPI {
   }
 
   private async request<T>(
-    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
-    endpoint: string,
-    data?: Record<string, unknown>,
-    customHeaders?: Record<string, string>
-  ): Promise<T> {
-    try {
-      const headers = {
-        'Authorization': `Bearer ${this.accessToken}`,
-        'Content-Type': 'application/json',
-        ...customHeaders
-      };
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+  endpoint: string,
+  data?: Record<string, unknown>,
+  customHeaders?: Record<string, string>
+): Promise<T> {
+  try {
+    const headers = {
+      'Authorization': `Bearer ${this.accessToken}`,
+      'Content-Type': 'application/json',
+      ...customHeaders
+    };
 
-      const url = new URL(`${this.baseUrl}${endpoint}`);
-      if (this.teamId) {
-        url.searchParams.set('teamId', this.teamId);
-      }
-
-      const response: AxiosResponse<T> = await axios({
-        method,
-        url: url.toString(),
-        data,
-        headers,
-        timeout: 60000 // Longer timeout for deployment operations
-      });
-
-      return response.data;
-    } catch (error: unknown) {
-      this.handleVercelError(error);
-      throw error;
+    const url = new URL(`${this.baseUrl}${endpoint}`);
+    if (this.teamId) {
+      url.searchParams.set('teamId', this.teamId);
     }
+
+    const response: AxiosResponse<T> = await axios({
+      method,
+      url: url.toString(),
+      data,
+      headers,
+      timeout: 60000
+    });
+
+    return response.data;
+  } catch (error: unknown) {
+    this.handleVercelError(error);
+    throw error;
   }
+}
 
   private handleVercelError(error: unknown): void {
     if (error.response?.data?.error) {

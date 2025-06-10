@@ -1,6 +1,7 @@
 import axios from 'axios';
 import NotionAuthOptions from '../interfaces/Notion/NotionAuthOptions';
 import NotionPaginationParams from '../interfaces/Notion/NotionPaginationParams';
+import { toPaginationParams, getProperty } from '../utils/errorHandling';
 
 /**
  * Complete Notion API wrapper for interacting with all Notion endpoints
@@ -36,7 +37,7 @@ export class NotionAPI {
       method,
       url: `${this.baseUrl}${endpoint}`,
       data,
-      params,
+      params: toPaginationParams(params),
       headers: {
         'Authorization': `Bearer ${this.apiKey}`,
         'Notion-Version': this.version,
@@ -252,7 +253,7 @@ export class NotionAPI {
    * @param params Pagination parameters
    */
   async getBlockChildren(blockId: string, params?: NotionPaginationParams) {
-    return this.request<Record<string, unknown>>('get', `/v1/blocks/${blockId}/children`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/v1/blocks/${blockId}/children`, undefined, toPaginationParams(params));
   }
 
   /**
@@ -313,7 +314,7 @@ export class NotionAPI {
    * @param params Pagination parameters
    */
   async listUsers(params?: NotionPaginationParams) {
-    return this.request<Record<string, unknown>>('get', '/v1/users', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/v1/users', undefined, toPaginationParams(params));
   }
 
   // Search endpoint
@@ -381,7 +382,7 @@ export class NotionAPI {
     start_cursor?: string;
     page_size?: number;
   }) {
-    return this.request<Record<string, unknown>>('get', '/v1/comments', undefined, params);
+    return this.request<Record<string, unknown>>('get', '/v1/comments', undefined, toPaginationParams(params));
   }
 
   // Block content helpers
@@ -543,7 +544,7 @@ export class NotionAPI {
   createDivider() {
     return {
       type: 'divider',
-      divider: Record<string, never>
+      divider: {} as Record<string, never>
     };
   }
 
@@ -584,7 +585,8 @@ export class NotionAPI {
     };
 
     if (caption) {
-      bookmark.bookmark.caption = [{
+      const bookmarkContent = bookmark.bookmark as Record<string, unknown>;
+      bookmarkContent.caption = [{
         type: 'text',
         text: {
           content: caption
@@ -612,7 +614,8 @@ export class NotionAPI {
     };
 
     if (caption) {
-      image.image.caption = [{
+      const imageContent = image.image as Record<string, unknown>;
+      imageContent.caption = [{
         type: 'text',
         text: {
           content: caption
@@ -671,4 +674,3 @@ export class NotionAPI {
     return property;
   }
 }
-

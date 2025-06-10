@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
+import { handleAxiosError, toString, getProperty } from '../utils/errorHandling';
 
 export interface SendGridConfig {
   apiKey: string;
@@ -217,11 +218,22 @@ export class SendGridAPI {
   }
 
   private handleSendGridError(error: unknown): void {
-    if (error.response?.data?.errors) {
-      const errors = (error.response.data as { errors: Array<{ message: string }> }).errors;
-      const errorMessages = errors.map((err: { message: string }) => err.message).join(', ');
-      throw new Error(`SendGrid API Error: ${errorMessages}`);
+    if (axios.isAxiosError(error) && error.response?.data) {
+      const errorData = error.response.data as Record<string, unknown>;
+      const errors = getProperty(errorData, 'errors');
+      
+      if (Array.isArray(errors)) {
+        const errorMessages = errors.map((err: unknown) => {
+          if (typeof err === 'object' && err !== null) {
+            return toString(getProperty(err, 'message'));
+          }
+          return toString(err);
+        }).join(', ');
+        throw new Error(`SendGrid API Error: ${errorMessages}`);
+      }
     }
+    
+    handleAxiosError(error, 'SendGrid');
   }
 
   private formatEmailAddress(email: string, name?: string): { email: string; name?: string } {
@@ -260,34 +272,39 @@ export class SendGridAPI {
       subject: options.subject
     };
 
+    // Get the personalizations array safely
+    const personalizations = emailData.personalizations as Array<Record<string, unknown>>;
+    const firstPersonalization = personalizations[0];
+
     // Add CC and BCC if provided
     if (options.cc) {
-      emailData.personalizations[0].cc = this.formatEmailAddresses(options.cc);
+      firstPersonalization.cc = this.formatEmailAddresses(options.cc);
     }
     if (options.bcc) {
-      emailData.personalizations[0].bcc = this.formatEmailAddresses(options.bcc);
+      firstPersonalization.bcc = this.formatEmailAddresses(options.bcc);
     }
 
     // Add content
     if (options.templateId) {
       emailData.templateId = options.templateId;
       if (options.dynamicTemplateData) {
-        emailData.personalizations[0].dynamicTemplateData = options.dynamicTemplateData;
+        firstPersonalization.dynamicTemplateData = options.dynamicTemplateData;
       }
     } else {
-      emailData.content = [];
+      const content: Array<Record<string, unknown>> = [];
       if (options.text) {
-        emailData.content.push({
+        content.push({
           type: 'text/plain',
           value: options.text
         });
       }
       if (options.html) {
-        emailData.content.push({
+        content.push({
           type: 'text/html',
           value: options.html
         });
       }
+      emailData.content = content;
     }
 
     // Add optional fields
@@ -295,10 +312,10 @@ export class SendGridAPI {
       emailData.attachments = options.attachments;
     }
     if (options.customArgs) {
-      emailData.personalizations[0].customArgs = options.customArgs;
+      firstPersonalization.customArgs = options.customArgs;
     }
     if (options.headers) {
-      emailData.personalizations[0].headers = options.headers;
+      firstPersonalization.headers = options.headers;
     }
     if (options.categories) {
       emailData.categories = options.categories;
@@ -324,7 +341,7 @@ export class SendGridAPI {
     // SendGrid returns a 202 status with no body for successful sends
     // We need to extract the message ID from the response headers
     return {
-      messageId: response?.messageId || 'sent'
+      messageId: toString(getProperty(response, 'messageId')) || 'sent'
     };
   }
 
@@ -493,7 +510,7 @@ export class SendGridAPI {
    * Get email statistics for date range
    */
   async getEmailStats(startDate: string, endDate?: string, aggregatedBy?: 'day' | 'week' | 'month'): Promise<EmailStats[]> {
-    const params: Record<string, unknown> = {
+    const params: Record<string, string> = {
       startDate,
       aggregatedBy: aggregatedBy || 'day'
     };
@@ -620,6 +637,3 @@ export class SendGridAPI {
     }
   }
 }
-
-
-

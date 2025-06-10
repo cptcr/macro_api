@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import crypto from 'crypto';
+import { handleAxiosError, toString, getProperty, toRequestData } from '../utils/errorHandling';
 
 export interface SlackConfig {
   botToken: string;
@@ -249,7 +250,7 @@ export class SlackAPI {
   private async request<T>(
     method: 'GET' | 'POST',
     endpoint: string,
-    data?: Record<string, unknown>,
+    data?: Record<string, unknown> | FormData,
     headers?: Record<string, string>
   ): Promise<T> {
     try {
@@ -271,8 +272,9 @@ export class SlackAPI {
 
       const result = response.data as Record<string, unknown>;
       
-      if (!result.ok) {
-        throw new Error(`Slack API Error: ${result.error || 'Unknown error'}`);
+      if (!getProperty(result, 'ok')) {
+        const errorMsg = toString(getProperty(result, 'error')) || 'Unknown error';
+        throw new Error(`Slack API Error: ${errorMsg}`);
       }
 
       return response.data;
@@ -283,10 +285,13 @@ export class SlackAPI {
   }
 
   private handleSlackError(error: unknown): void {
-    if (error.response?.data?.error) {
-      const slackError = error.response.data.error;
-      throw new Error(`Slack API Error: ${slackError}`);
+    if (axios.isAxiosError(error) && error.response?.data) {
+      const errorData = error.response.data as Record<string, unknown>;
+      const slackError = getProperty(errorData, 'error');
+      throw new Error(`Slack API Error: ${toString(slackError)}`);
     }
+    
+    handleAxiosError(error, 'Slack');
   }
 
   /**
@@ -319,21 +324,15 @@ export class SlackAPI {
     file: Buffer | string,
     options?: FileOptions
   ): Promise<FileResponse> {
-    const formData = new FormData();
-    
-    if (typeof file === 'string') {
-      formData.append('content', file);
-    } else {
-      formData.append('file', new Blob([file]), options?.filename || 'file');
-    }
-
-    formData.append('channels', Array.isArray(channels) ? channels.join(',') : channels);
-    
-    if (options?.filename) formData.append('filename', options.filename);
-    if (options?.title) formData.append('title', options.title);
-    if (options?.filetype) formData.append('filetype', options.filetype);
-    if (options?.initialComment) formData.append('initial_comment', options.initialComment);
-    if (options?.threadTs) formData.append('thread_ts', options.threadTs);
+    const formData = toRequestData({
+      channels: Array.isArray(channels) ? channels.join(',') : channels,
+      content: typeof file === 'string' ? file : file.toString('base64'),
+      filename: options?.filename,
+      title: options?.title,
+      filetype: options?.filetype,
+      initial_comment: options?.initialComment,
+      thread_ts: options?.threadTs
+    });
 
     return this.request<FileResponse>('POST', 'files.upload', formData, {
       'Content-Type': 'multipart/form-data'
@@ -653,6 +652,3 @@ export class SlackAPI {
     }
   }
 }
-
-
-

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import GitHubAuthOptions from '../interfaces/GitHub/GitHubAuthOptions';
 import { GitHubPaginationParams } from '../interfaces/GitHub/GitHubPaginationParams';
+import { toPaginationParams } from '../utils/errorHandling';
 
 /**
  * Complete GitHub API wrapper for interacting with all GitHub endpoints
@@ -34,7 +35,7 @@ export class GitHubAPI {
       method,
       url: `${this.baseUrl}${endpoint}`,
       data,
-      params,
+      params: toPaginationParams(params),
       headers: {
         'Authorization': `token ${this.token}`,
         'Accept': 'application/vnd.github.v3+json',
@@ -72,7 +73,7 @@ export class GitHubAPI {
     sort?: 'created' | 'updated' | 'pushed' | 'full_name';
     direction?: 'asc' | 'desc';
   }) {
-    return this.request<Record<string, unknown>>('get', `/users/${username}/repos`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/users/${username}/repos`, undefined, toPaginationParams(params));
   }
 
   /**
@@ -81,7 +82,7 @@ export class GitHubAPI {
    * @param params Pagination parameters
    */
   async getUserOrgs(username: string, params?: GitHubPaginationParams) {
-    return this.request<Record<string, unknown>>('get', `/users/${username}/orgs`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/users/${username}/orgs`, undefined, toPaginationParams(params));
   }
 
   // Repository endpoints
@@ -159,7 +160,7 @@ export class GitHubAPI {
    * @param params Pagination parameters
    */
   async getRepoBranches(owner: string, repo: string, params?: GitHubPaginationParams) {
-    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/branches`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/branches`, undefined, toPaginationParams(params));
   }
 
   /**
@@ -249,7 +250,7 @@ export class GitHubAPI {
     per_page?: number;
     page?: number;
   }) {
-    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/pulls`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/pulls`, undefined, toPaginationParams(params));
   }
 
   /**
@@ -332,7 +333,7 @@ export class GitHubAPI {
     per_page?: number;
     page?: number;
   }) {
-    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/issues`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/issues`, undefined, toPaginationParams(params));
   }
 
   /**
@@ -391,7 +392,7 @@ export class GitHubAPI {
    * @param params Pagination parameters
    */
   async getIssueComments(owner: string, repo: string, issueNumber: number, params?: GitHubPaginationParams) {
-    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/issues/${issueNumber}/comments`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/issues/${issueNumber}/comments`, undefined, toPaginationParams(params));
   }
 
   /**
@@ -447,7 +448,7 @@ export class GitHubAPI {
     per_page?: number;
     page?: number;
   }) {
-    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/commits`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/commits`, undefined, toPaginationParams(params));
   }
 
   /**
@@ -480,7 +481,7 @@ export class GitHubAPI {
    * @param params Pagination parameters
    */
   async getReleases(owner: string, repo: string, params?: GitHubPaginationParams) {
-    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/releases`, undefined, params);
+    return this.request<Record<string, unknown>>('get', `/repos/${owner}/${repo}/releases`, undefined, toPaginationParams(params));
   }
 
   /**
@@ -557,7 +558,7 @@ export class GitHubAPI {
   }) {
     return this.request<Record<string, unknown>>('get', '/search/repositories', undefined, { 
       q: query,
-      ...params
+      ...toPaginationParams(params)
     });
   }
 
@@ -574,7 +575,7 @@ export class GitHubAPI {
   }) {
     return this.request<Record<string, unknown>>('get', '/search/code', undefined, { 
       q: query,
-      ...params
+      ...toPaginationParams(params)
     });
   }
 
@@ -591,8 +592,7 @@ export class GitHubAPI {
   }) {
     return this.request<Record<string, unknown>>('get', '/search/issues', undefined, { 
       q: query,
-      ...params
+      ...toPaginationParams(params)
     });
   }
 }
-

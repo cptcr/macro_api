@@ -106,31 +106,80 @@ export function handleAxiosError(error: unknown, serviceName: string): never {
 }
 
 /**
- * Convert unknown values to Record<string, unknown> safely
+ * Safely convert unknown to Record<string, unknown>
  */
 export function toRecord(value: unknown): Record<string, unknown> {
-  if (value && typeof value === 'object' && !Array.isArray(value)) {
+  if (value && typeof value === 'object' && !Array.isArray(value) && value !== null) {
     return value as Record<string, unknown>;
   }
   return {};
 }
 
 /**
- * Convert pagination params to URLSearchParams compatible format
+ * Convert pagination params to Record<string, unknown> format
  */
-export function toPaginationParams(params: unknown): Record<string, string> {
-  const result: Record<string, string> = {};
+export function toPaginationParams(params: unknown): Record<string, unknown> {
+  if (params && typeof params === 'object' && !Array.isArray(params) && params !== null) {
+    return params as Record<string, unknown>;
+  }
+  return {};
+}
+
+/**
+ * Convert FormData or unknown data to proper request format
+ */
+export function toRequestData(data: unknown): Record<string, unknown> | FormData | undefined {
+  if (!data) return undefined;
   
-  if (params && typeof params === 'object') {
-    const paramsObj = params as Record<string, unknown>;
-    for (const [key, value] of Object.entries(paramsObj)) {
-      if (value !== undefined && value !== null) {
-        result[key] = String(value);
-      }
-    }
+  // If it's already FormData, return as-is
+  if (data instanceof FormData) {
+    return data;
   }
   
-  return result;
+  // If it's an object, ensure it's Record<string, unknown>
+  if (typeof data === 'object' && !Array.isArray(data) && data !== null) {
+    return data as Record<string, unknown>;
+  }
+  
+  return {};
+}
+
+/**
+ * Safely convert unknown to string
+ */
+export function toString(value: unknown): string {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (value === null || value === undefined) {
+    return '';
+  }
+  return String(value);
+}
+
+/**
+ * Safely convert unknown to number
+ */
+export function toNumber(value: unknown): number {
+  if (typeof value === 'number') {
+    return value;
+  }
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    return isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
+}
+
+/**
+ * Safely get property from unknown object
+ */
+export function getProperty(obj: unknown, key: string): unknown {
+  if (obj && typeof obj === 'object' && !Array.isArray(obj) && obj !== null) {
+    const record = obj as Record<string, unknown>;
+    return record[key];
+  }
+  return undefined;
 }
 
 export default {
@@ -139,5 +188,9 @@ export default {
   isAxiosError,
   hasAxiosResponse,
   toRecord,
-  toPaginationParams
+  toPaginationParams,
+  toRequestData,
+  toString,
+  toNumber,
+  getProperty
 };
